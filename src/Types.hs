@@ -19,7 +19,7 @@ data Direction = North | South | East | West deriving (Show, Eq)
 data Room = Room {
     roomName :: String,            -- Name of the room
     description :: String,         -- Description shown to the player
-    exits :: [(Direction, String)], -- Possible exits (Direction, connected room name)
+    exits :: [(Direction, String)], -- Possible exits (Direction, connected room name) TODO: add world change
     items :: [Item],               -- Items in the room
     enemies :: [Enemy],            -- Enemies present in the room
     doors :: [Door]                -- Doors connected to this room
@@ -95,5 +95,6 @@ data Action = Go Direction         -- Move in a specific direction
             | TalkTo String        -- Talk to an NPC by name
             | OpenDoor String      -- Open a door by name
             | UseItem String       -- Use an item by name
+            | OpenInv              -- Opens the player's inventory
             | Quit                 -- Quit the game
             deriving (Show, Eq)

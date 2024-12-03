@@ -27,8 +27,10 @@ library
   exposed-modules:
       GameLoop
       InitialState
+      Inventory
       Lib
       Types
+      Utils
   other-modules:
       Paths_AS3_Project
   autogen-modules:
