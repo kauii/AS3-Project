@@ -1,6 +1,7 @@
 module GameLoop (runGameLoop) where
 
 import Types
+import Control.Monad
 import Control.Monad.State
 import InitialState
 import Data.Maybe (fromMaybe)
@@ -8,9 +9,6 @@ import Data.List (find)
 import qualified Data.Map as Map
 import RoomObjectInteraction (findObjectByName, inspectObject)
 import FlagsUtils (checkFlag)
-
-main :: IO ()
-main = runGameLoop initialState
 
 -- | Run the game loop using StateT to manage the game state
 runGameLoop :: GameState -> IO ()
