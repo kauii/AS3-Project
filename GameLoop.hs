@@ -5,6 +5,12 @@ import Control.Monad.State
 import InitialState
 import Data.Maybe (fromMaybe)
 import Data.List (find)
+import qualified Data.Map as Map
+import RoomObjectInteraction (findObjectByName, inspectObject)
+import FlagsUtils (checkFlag)
+
+main :: IO ()
+main = runGameLoop initialState
 
 -- | Run the game loop using StateT to manage the game state
 runGameLoop :: GameState -> IO ()
@@ -41,7 +47,7 @@ parseAction input =
         ["Go", dir] -> fmap Go (parseDirection dir)
         ["Take", item]   -> Just (Take item)
         ["Drop", item]   -> Just (Drop item)
-        ["Inspect", name] -> Just (Inspect name)
+        ("Inspect" : nameParts) -> Just (Inspect (unwords nameParts))
         ["Attack", name] -> Just (Attack name)
         ["TalkTo", name] -> Just (TalkTo name)
         ["OpenDoor", name] -> Just (OpenDoor name)
@@ -85,12 +91,12 @@ movePlayer dir = do
             liftIO $ putStrLn $ "You move to " ++ roomName
         Nothing -> liftIO $ putStrLn "You can't go that way!"
 
+
 -- | Stub functions for other actions
-takeItem, dropItem, inspect, attackEnemy, talkTo, openDoor, useItem ::
+takeItem, dropItem, attackEnemy, talkTo, openDoor, useItem ::
     String -> StateT GameState IO ()
 takeItem _ = liftIO $ putStrLn "Take action not implemented yet."
 dropItem _ = liftIO $ putStrLn "Drop action not implemented yet."
-inspect _ = liftIO $ putStrLn "Inspect action not implemented yet."
 attackEnemy _ = liftIO $ putStrLn "Attack action not implemented yet."
 talkTo _ = liftIO $ putStrLn "Talk action not implemented yet."
 openDoor _ = liftIO $ putStrLn "OpenDoor action not implemented yet."
@@ -103,3 +109,26 @@ findRoom name rooms = fromMaybe (error "Room not found!") (find (\r -> roomName 
 -- | Get the player's current room
 getPlayerRoom :: Player -> [Room] -> Room
 getPlayerRoom player = findRoom (location player)
+
+-- Function to handle the "inspect" command
+inspect :: String -> StateT GameState IO ()
+inspect "room" = do
+    gameState <- get
+    let player = playerState gameState
+    let room = getPlayerRoom player (world gameState) -- Assuming a function or field to get current room
+    liftIO $ putStrLn $ description room -- Print room description
+inspect objectName = do
+    gameState <- get
+    let player = playerState gameState
+    let room = getPlayerRoom player (world gameState) -- Assuming a function or field to get current room
+        maybeObject = findObjectByName objectName (roomObjects room)
+    case maybeObject of
+        Nothing -> liftIO $ putStrLn "Object not found."
+        Just obj -> inspectObject obj
+
+
+-- Print a description if its flag condition is met
+printDescription :: Map.Map String Bool -> (String, String, Bool) -> IO ()
+printDescription flags (desc, flagKey, requiredState) =
+    when (checkFlag flagKey requiredState flags) $
+        putStrLn desc
