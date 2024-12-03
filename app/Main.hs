@@ -1,6 +1,7 @@
 module Main (main) where
 
-import Lib
+import GameLoop (runGameLoop)
+import InitialState (initialState)
 
 main :: IO ()
-main = someFunc
+main = runGameLoop initialState
