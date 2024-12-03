@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- mtl
 
 ghc-options:
 - -Wall
@@ -35,6 +36,9 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - base
+  - mtl
 
 executables:
   AS3-Project-exe:
@@ -46,6 +50,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - AS3-Project
+    - mtl
 
 tests:
   AS3-Project-test:
