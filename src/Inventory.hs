@@ -22,6 +22,8 @@ openInventory = do
     liftIO $ putStrLn $ "  Life: " ++ show (life player) ++ "/" ++ show (vitality (stats player))
     liftIO $ putStrLn $ "  Attack: " ++ show (attack (stats player))
     liftIO $ putStrLn $ "  Defense: " ++ show (defense (stats player))
+    liftIO $ putStrLn $ "  Agility: " ++ show (agility (stats player))
+
 
     -- Display inventory
     let inventoryItems = inventory player
@@ -156,8 +158,10 @@ applyEffect effect player =
             Nothing -> stats player
             Just statChanges -> PlayerStats
                 { vitality = max 1 (vitality (stats player) + vitality statChanges)
-                , attack = max 0 (attack (stats player) + attack statChanges) 
-                , defense = max 0 (defense (stats player) + defense statChanges) 
+                , attack = max 1 (attack (stats player) + attack statChanges) 
+                , defense = max 1 (defense (stats player) + defense statChanges)
+                , agility = max 1 (agility (stats player) + agility statChanges) 
+
                 }
 
         -- Apply healing

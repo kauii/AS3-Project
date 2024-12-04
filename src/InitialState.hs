@@ -73,7 +73,8 @@ mysteriousPotion = Item
     , effect = Just $ Effect { modifyStats = Just PlayerStats 
             { vitality = 10
             , attack = -5
-            , defense = 0 }
+            , defense = 0
+            , agility = 0 }
             , heal = Nothing
             , unlockDoor = Nothing }
     }
@@ -124,7 +125,7 @@ initialPlayer = Player
     { location = "Starting Room"
     , inventory = []
     , life = 90
-    , stats = PlayerStats { vitality = 100, attack = 10, defense = 5 }
+    , stats = PlayerStats { vitality = 100, attack = 10, defense = 5, agility = 20 }
     , quests = []
     }
 

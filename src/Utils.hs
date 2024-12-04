@@ -58,12 +58,6 @@ checkFlag key requiredState flags =
         Just state -> state == requiredState
         Nothing    -> not requiredState  -- Default to False if flag not found
 
--- Convert PlayerStats to a readable string
-describePlayerStats :: Maybe PlayerStats -> String
-describePlayerStats Nothing = "No stat changes."
-describePlayerStats (Just stats) =
-    "Attack: " ++ show (attack stats) ++ ", Defense: " ++ show (defense stats)
-
 -- Convert healing effect to a readable string
 describeHealing :: Maybe Int -> String
 describeHealing Nothing = "No healing effect."
@@ -80,7 +74,7 @@ describeEffect Nothing = "No effects."
 describeEffect (Just effect) =
     let stats = case modifyStats effect of
                   Nothing -> []
-                  Just stats -> ["Stat Changes: Max Life: " ++ show (vitality stats) ++ ", Attack: " ++ show (attack stats) ++ ", Defense: " ++ show (defense stats)]
+                  Just stats -> ["Stat Changes: Max Life: " ++ show (vitality stats) ++ ", Attack: " ++ show (attack stats) ++ ", Defense: " ++ show (defense stats) ++ ", Agility: " ++ show (agility stats)]
         healing = case heal effect of
                     Nothing -> []
                     Just amount -> ["Healing: Restores " ++ show amount ++ " HP"]
