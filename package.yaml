@@ -39,6 +39,7 @@ library:
   dependencies:
   - base
   - mtl
+  - containers
 
 executables:
   AS3-Project-exe:
@@ -51,6 +52,7 @@ executables:
     dependencies:
     - AS3-Project
     - mtl
+    - containers
 
 tests:
   AS3-Project-test:

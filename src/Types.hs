@@ -1,6 +1,7 @@
 module Types (
     Direction(..),
     Room(..),
+    RoomObject(..),
     Item(..),
     Effect(..),
     Player(..),
@@ -12,6 +13,10 @@ module Types (
     Action(..)
 ) where
 
+import Control.Monad.State
+import Data.Map (Map)
+import qualified Data.Map as Map
+
 -- Directions for navigation
 data Direction = North | South | East | West deriving (Show, Eq)
 
@@ -19,11 +24,19 @@ data Direction = North | South | East | West deriving (Show, Eq)
 data Room = Room {
     roomName :: String,            -- Name of the room
     description :: String,         -- Description shown to the player
+    roomObjects :: [RoomObject],
     exits :: [(Direction, String)], -- Possible exits (Direction, connected room name)
     items :: [Item],               -- Items in the room
     enemies :: [Enemy],            -- Enemies present in the room
     doors :: [Door]                -- Doors connected to this room
 } deriving (Show)
+
+data RoomObject = RoomObject {
+    objectName :: String,
+    descriptions :: [(String, String, Bool)],
+    roomObjectItems :: [Item],
+    roomActions :: [(String, String -> StateT GameState IO ())]
+}
 
 -- Items, which can have effects when used
 data Item = Item {
@@ -83,7 +96,8 @@ data Door = Door {
 -- Game state encapsulating player and world
 data GameState = GameState {
     playerState :: Player,    -- Current state of the player
-    world :: [Room]                -- List of all rooms in the game world
+    world :: [Room],                -- List of all rooms in the game world
+    flags :: Map.Map String Bool
 } deriving (Show)
 
 -- Actions a player can perform
@@ -95,5 +109,16 @@ data Action = Go Direction         -- Move in a specific direction
             | TalkTo String        -- Talk to an NPC by name
             | OpenDoor String      -- Open a door by name
             | UseItem String       -- Use an item by name
+            | OpenInv              -- Opens the player's inventory
             | Quit                 -- Quit the game
+            | Back                 -- Go Back
             deriving (Show, Eq)
+
+
+-- Helper Show Functions (Maybe remove?)
+instance Show RoomObject where
+    show (RoomObject name descs items actions) =
+        "RoomObject { " ++
+        "descriptions = " ++ show descs ++ ", " ++
+        "roomObjectItems = " ++ show items ++ ", " ++
+        "roomActions = <functions> }"

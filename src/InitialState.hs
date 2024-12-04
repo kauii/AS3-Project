@@ -1,6 +1,27 @@
 module InitialState (initialState) where
 
 import Types
+import Control.Monad.State
+import qualified Data.Map as Map
+
+object1 :: RoomObject
+object1 = RoomObject {
+    objectName = "Mysterious Statue",
+    descriptions = [
+        ("An ancient statue covered in moss.", "is_true", True),
+        ("The statue has a hidden compartment.", "statue_searched", True),
+        ("The compartment is open and empty", "compartment_opened", True)
+    ],
+    roomObjectItems = [],
+    roomActions = [
+        ("search", \_ -> do
+            modify (\gs -> gs { flags = Map.insert "statue_searched" True (flags gs) })
+            liftIO $ putStrLn "You discover a hidden compartment in the statue!"),
+        ("open", \_ -> do
+            modify (\gs -> gs { flags = Map.insert "compartment_opened" True (flags gs) })
+            liftIO $ putStrLn "You discover a hidden compartment in the statue!")
+    ]
+}
 
 -- A sample room
 startingRoom :: Room
@@ -8,6 +29,7 @@ startingRoom = Room
     { roomName = "Starting Room"
     , description = "A small, dimly lit room with stone walls. There's a wooden door to the north."
     , exits = [(North, "Hallway")]
+    , roomObjects = [object1]
     , items = [healthPotion, rustyKey]
     , enemies = []
     , doors = [woodenDoor]
@@ -18,6 +40,7 @@ hallway = Room
     { roomName = "Hallway"
     , description = "A long corridor with flickering torches on the walls. You can see another door to the east."
     , exits = [(South, "Starting Room"), (East, "Armory")]
+    , roomObjects = []
     , items = []
     , enemies = [goblin]
     , doors = []
@@ -28,6 +51,7 @@ armory = Room
     { roomName = "Armory"
     , description = "An old armory filled with rusted weapons and armor. A treasure chest lies in the corner."
     , exits = [(West, "Hallway")]
+    , roomObjects = []
     , items = [sword]
     , enemies = []
     , doors = []
@@ -97,4 +121,5 @@ initialState :: GameState
 initialState = GameState
     { playerState = initialPlayer
     , world = [startingRoom, hallway, armory]
+    , flags = Map.fromList [("statue_searched", False), ("compartment_opened", False), ("is_true", True)]
     }
