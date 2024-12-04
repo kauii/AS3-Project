@@ -100,6 +100,7 @@ goblin = Enemy
     , enemyHealth = 30
     , enemyAttack = 5
     , enemyDefense = 2
+    , enemyAgility = 10
     , loot = [goldCoin]
     }
 

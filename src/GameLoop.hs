@@ -3,7 +3,8 @@ module GameLoop (runGameLoop, parseAction) where
 import Types
 import Control.Monad
 import Inventory (openInventory)
-import Utils (parseAction, getPlayerRoom, findRoom, checkFlag)
+import Fight (enterCombat)
+import Utils (parseAction, getPlayerRoom, checkFlag)
 import Control.Monad.State
 import Data.List (find, intercalate)
 import Data.Char (toLower)
@@ -66,10 +67,19 @@ movePlayer dir = do
     let currentRoom = getPlayerRoom player (world gameState)
     let maybeExit = lookup dir (exits currentRoom)
     case maybeExit of
-        Just room -> do
-            put $ gameState { playerState = player { location = room } }
-            liftIO $ putStrLn $ "You move to " ++ room
+        Just roomName -> do
+            -- Move player to the new room
+            put $ gameState { playerState = player { location = roomName } }
+            liftIO $ putStrLn $ "You move to " ++ roomName
+            
+            -- Check for enemies in the new room
+            let newRoom = getPlayerRoom (player { location = roomName }) (world gameState)
+            unless (null (enemies newRoom)) $ do
+                liftIO $ putStrLn "You sense danger as you enter the room..."
+                enterCombat  -- Call the combat system
+            
         Nothing -> liftIO $ putStrLn "You can't go that way!"
+
 
 -- | Take item given item name
 takeItem :: String -> StateT GameState IO ()

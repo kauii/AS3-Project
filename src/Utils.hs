@@ -1,4 +1,4 @@
-module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader) where
+module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight) where
 
 import Types
 import Data.Maybe (fromMaybe)
@@ -49,6 +49,15 @@ parseActionInventory input =
         ("inspect" : nameWords) -> Just (Inspect (unwords nameWords))
         ("use" : nameWords) -> Just (UseItem (unwords nameWords))
         ["back"] -> Just Back
+        _ -> Nothing
+
+-- | Parse the user input into an Action for Fight Interaction
+parseActionFight :: String -> Maybe Action
+parseActionFight input =
+    case words (map toLower input) of  -- Normalize the input to lowercase
+        ["attack"] -> Just (Attack "enemy")  -- Assuming "enemy" will be replaced by a specific target
+        ("use" : itemWords) -> Just (UseItem (unwords itemWords))
+        ["flee"] -> Just Flee
         _ -> Nothing
 
 -- Function to check if a flag condition is met

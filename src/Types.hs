@@ -42,14 +42,14 @@ data Item = Item {
     itemName :: String,            -- Name of the item
     itemDescription :: String,     -- Description of the item
     effect :: Maybe Effect         -- Effect the item has when used (if any)
-} deriving (Show)
+} deriving (Show, Eq)
 
 -- Effects of items, which can modify player stats or state
 data Effect = Effect {
     modifyStats :: Maybe PlayerStats, -- Changes to player stats (e.g., +ATK, +DEF)
     heal :: Maybe Int,                -- Healing amount for the player
     unlockDoor :: Maybe String        -- Unlock a door with this name
-} deriving (Show)
+} deriving (Show, Eq)
 
 -- Player stats, such as attack and defense
 data PlayerStats = PlayerStats {
@@ -79,11 +79,13 @@ data Quest = Quest {
 -- Enemies in the game, which can be placed in rooms
 data Enemy = Enemy {
     enemyName :: String,           -- Name of the enemy
-    enemyHealth :: Int,                 -- Enemy's health
+    enemyHealth :: Int,            -- Enemy's health
     enemyAttack :: Int,            -- Enemy's attack power
-    enemyDefense :: Int,                -- Enemy's defense
+    enemyDefense :: Int,           -- Enemy's defense
+    enemyAgility :: Int,           -- Enemy's agility for turn order
     loot :: [Item]                 -- Items dropped upon defeat
-} deriving (Show)
+} deriving (Show, Eq)
+
 
 -- Doors connecting rooms
 data Door = Door {
@@ -112,6 +114,7 @@ data Action = Go Direction         -- Move in a specific direction
             | OpenInv              -- Opens the player's inventory
             | Quit                 -- Quit the game
             | Back                 -- Go Back
+            | Flee                 -- Attempt to flee combat
             deriving (Show, Eq)
 
 
