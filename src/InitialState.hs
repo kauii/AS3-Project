@@ -41,7 +41,7 @@ hallway = Room
     , description = "A long corridor with flickering torches on the walls. You can see another door to the east."
     , exits = [(South, "Starting Room"), (East, "Armory")]
     , roomObjects = []
-    , items = []
+    , items = [mysteriousPotion]
     , enemies = [goblin]
     , doors = []
     }
@@ -63,6 +63,19 @@ healthPotion = Item
     { itemName = "Health Potion"
     , itemDescription = "A small vial filled with a red liquid. Restores 20 health."
     , effect = Just $ Effect { modifyStats = Nothing, heal = Just 20, unlockDoor = Nothing }
+    }
+
+-- Sample items
+mysteriousPotion :: Item
+mysteriousPotion = Item
+    { itemName = "Mysterious Potion"
+    , itemDescription = "A strong smelly potion. The liquid is so opaque, you can barely see through. "
+    , effect = Just $ Effect { modifyStats = Just PlayerStats 
+            { vitality = 10
+            , attack = -5
+            , defense = 0 }
+            , heal = Nothing
+            , unlockDoor = Nothing }
     }
 
 rustyKey :: Item
@@ -111,8 +124,7 @@ initialPlayer = Player
     { location = "Starting Room"
     , inventory = []
     , life = 90
-    , maxLife = 100
-    , stats = PlayerStats { attack = 10, defense = 5 }
+    , stats = PlayerStats { vitality = 100, attack = 10, defense = 5 }
     , quests = []
     }
 

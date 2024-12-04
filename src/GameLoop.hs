@@ -17,9 +17,9 @@ runGameLoop = evalStateT gameLoop
 -- | The main game loop, running within StateT monad
 gameLoop :: StateT GameState IO ()
 gameLoop = do
-    state <- get
-    let player = playerState state
-    let currentRoom = getPlayerRoom player (world state)
+    gameState <- get
+    let player = playerState gameState
+    let currentRoom = getPlayerRoom player (world gameState)
 
      -- Extract the item names from the room
     let itemNames = map itemName (items currentRoom)
@@ -50,34 +50,33 @@ gameLoop = do
 handleAction :: Action -> StateT GameState IO ()
 handleAction action = case action of
     Go dir           -> movePlayer dir
-    Take itemName    -> takeItem itemName
-    Attack enemyName -> attackEnemy enemyName
+    Take item    -> takeItem item
+    Attack enemy -> attackEnemy enemy
     TalkTo npcName   -> talkTo npcName
     Inspect object -> inspect object
-    OpenDoor doorName -> openDoor doorName
+    OpenDoor door -> openDoor door
     OpenInv          -> openInventory
-    Quit             -> liftIO $ putStrLn "Goodbye!"
+    _             -> liftIO $ putStrLn "Goodbye!"
 
 -- | Move the player in a given direction
 movePlayer :: Direction -> StateT GameState IO ()
 movePlayer dir = do
-    state <- get
-    let player = playerState state
-    let currentRoom = getPlayerRoom player (world state)
+    gameState <- get
+    let player = playerState gameState
+    let currentRoom = getPlayerRoom player (world gameState)
     let maybeExit = lookup dir (exits currentRoom)
     case maybeExit of
-        Just roomName -> do
-            let newRoom = findRoom roomName (world state)
-            put $ state { playerState = player { location = roomName } }
-            liftIO $ putStrLn $ "You move to " ++ roomName
+        Just room -> do
+            put $ gameState { playerState = player { location = room } }
+            liftIO $ putStrLn $ "You move to " ++ room
         Nothing -> liftIO $ putStrLn "You can't go that way!"
 
 -- | Take item given item name
 takeItem :: String -> StateT GameState IO ()
 takeItem itemNameInput = do
-    state <- get
-    let player = playerState state
-    let currentRoom = getPlayerRoom player (world state)
+    gameState <- get
+    let player = playerState gameState
+    let currentRoom = getPlayerRoom player (world gameState)
 
     let maybeItem = find (\item -> map toLower (itemName item) == map toLower itemNameInput) (items currentRoom)
 
@@ -88,9 +87,9 @@ takeItem itemNameInput = do
             
             let updatedRoomItems = filter (\i -> itemName i /= itemName item) (items currentRoom)
             let updatedRoom = currentRoom { items = updatedRoomItems }
-            let updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world state)
+            let updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world gameState)
 
-            put state { playerState = updatedPlayer, world = updatedWorld }
+            put gameState { playerState = updatedPlayer, world = updatedWorld }
             liftIO $ putStrLn $ "Added " ++ itemName item ++ " to your inventory."
         Nothing -> liftIO $ putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not in this room."
 
@@ -109,11 +108,11 @@ inspect "room" = do
     let player = playerState gameState
     let room = getPlayerRoom player (world gameState) -- Assuming a function or field to get current room
     liftIO $ putStrLn $ description room -- Print room description
-inspect objectName = do
+inspect object = do
     gameState <- get
     let player = playerState gameState
     let room = getPlayerRoom player (world gameState) -- Assuming a function or field to get current room
-        maybeObject = findObjectByName objectName (roomObjects room)
+        maybeObject = findObjectByName object (roomObjects room)
     case maybeObject of
         Nothing -> liftIO $ putStrLn "Object not found."
         Just obj -> inspectObject obj

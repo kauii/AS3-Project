@@ -19,7 +19,7 @@ openInventory = do
 
     -- Display player stats
     liftIO $ putStrLn "Player Stats:"
-    liftIO $ putStrLn $ "  Life: " ++ show (life player) ++ "/" ++ show (maxLife player)
+    liftIO $ putStrLn $ "  Life: " ++ show (life player) ++ "/" ++ show (vitality (stats player))
     liftIO $ putStrLn $ "  Attack: " ++ show (attack (stats player))
     liftIO $ putStrLn $ "  Defense: " ++ show (defense (stats player))
 
@@ -155,14 +155,16 @@ applyEffect effect player =
         updatedStats = case modifyStats effect of
             Nothing -> stats player
             Just statChanges -> PlayerStats
-                { attack = attack (stats player) + attack statChanges
-                , defense = defense (stats player) + defense statChanges
+                { vitality = max 1 (vitality (stats player) + vitality statChanges)
+                , attack = max 0 (attack (stats player) + attack statChanges) 
+                , defense = max 0 (defense (stats player) + defense statChanges) 
                 }
 
         -- Apply healing
         updatedLife = case heal effect of
             Nothing -> life player
-            Just healingAmount -> min (life player + healingAmount) (maxLife player)
+            Just healingAmount -> min (life player + healingAmount) (vitality updatedStats)
 
     in player { stats = updatedStats, life = updatedLife }
+
 

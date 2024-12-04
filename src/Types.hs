@@ -14,7 +14,6 @@ module Types (
 ) where
 
 import Control.Monad.State
-import Data.Map (Map)
 import qualified Data.Map as Map
 
 -- Directions for navigation
@@ -54,6 +53,7 @@ data Effect = Effect {
 
 -- Player stats, such as attack and defense
 data PlayerStats = PlayerStats {
+    vitality :: Int,
     attack :: Int,                 -- Player's attack power
     defense :: Int               -- Player's defense power
 } deriving (Show, Eq)
@@ -63,7 +63,6 @@ data Player = Player {
     location :: String,            -- Current room name
     inventory :: [Item],           -- Items the player carries
     life :: Int,                   -- Player's current life
-    maxLife :: Int,                -- Player's maximum life
     stats :: PlayerStats,          -- The player's stats
     quests :: [Quest]              -- List of quests the player is working on
 } deriving (Show)

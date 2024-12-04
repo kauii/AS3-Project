@@ -24,12 +24,13 @@ parseAction input =
 
 -- | Parse a direction string into a Direction
 parseDirection :: String -> Maybe Direction
-parseDirection dir = case dir of
-    "North" -> Just North
-    "South" -> Just South
-    "East"  -> Just East
-    "West"  -> Just West
+parseDirection dir = case map toLower dir of  -- Normalize direction to lowercase
+    "north" -> Just North
+    "south" -> Just South
+    "east"  -> Just East
+    "west"  -> Just West
     _       -> Nothing
+
 
 -- | Find a room by name
 findRoom :: String -> [Room] -> Room
@@ -79,7 +80,7 @@ describeEffect Nothing = "No effects."
 describeEffect (Just effect) =
     let stats = case modifyStats effect of
                   Nothing -> []
-                  Just stats -> ["Stat Changes: Attack: " ++ show (attack stats) ++ ", Defense: " ++ show (defense stats)]
+                  Just stats -> ["Stat Changes: Max Life: " ++ show (vitality stats) ++ ", Attack: " ++ show (attack stats) ++ ", Defense: " ++ show (defense stats)]
         healing = case heal effect of
                     Nothing -> []
                     Just amount -> ["Healing: Restores " ++ show amount ++ " HP"]
