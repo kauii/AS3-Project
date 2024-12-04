@@ -110,7 +110,7 @@ initialPlayer :: Player
 initialPlayer = Player
     { location = "Starting Room"
     , inventory = []
-    , life = 100
+    , life = 90
     , maxLife = 100
     , stats = PlayerStats { attack = 10, defense = 5 }
     , quests = []

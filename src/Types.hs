@@ -56,7 +56,7 @@ data Effect = Effect {
 data PlayerStats = PlayerStats {
     attack :: Int,                 -- Player's attack power
     defense :: Int               -- Player's defense power
-} deriving (Show)
+} deriving (Show, Eq)
 
 -- Player state, tracking the player's progress
 data Player = Player {

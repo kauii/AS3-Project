@@ -3,15 +3,12 @@ module GameLoop (runGameLoop, parseAction) where
 import Types
 import Control.Monad
 import Inventory (openInventory)
-import Utils (parseAction, parseDirection, getPlayerRoom, findRoom)
+import Utils (parseAction, getPlayerRoom, findRoom, checkFlag)
 import Control.Monad.State
-import InitialState
-import Data.Maybe (fromMaybe)
 import Data.List (find, intercalate)
 import Data.Char (toLower)
 import qualified Data.Map as Map
 import RoomObjectInteraction (findObjectByName, inspectObject)
-import Utils (checkFlag)
 
 -- | Run the game loop using StateT to manage the game state
 runGameLoop :: GameState -> IO ()
@@ -98,13 +95,12 @@ takeItem itemNameInput = do
         Nothing -> liftIO $ putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not in this room."
 
 -- | Stub functions for other actions
-attackEnemy, talkTo, openDoor, useItem ::
+attackEnemy, talkTo, openDoor ::
     String -> StateT GameState IO ()
 
 attackEnemy _ = liftIO $ putStrLn "Attack action not implemented yet."
 talkTo _ = liftIO $ putStrLn "Talk action not implemented yet."
 openDoor _ = liftIO $ putStrLn "OpenDoor action not implemented yet."
-useItem _ = liftIO $ putStrLn "UseItem action not implemented yet."
 
 -- Function to handle the "inspect" command
 inspect :: String -> StateT GameState IO ()
