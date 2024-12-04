@@ -97,4 +97,5 @@ data Action = Go Direction         -- Move in a specific direction
             | UseItem String       -- Use an item by name
             | OpenInv              -- Opens the player's inventory
             | Quit                 -- Quit the game
+            | Back                 -- Go Back
             deriving (Show, Eq)

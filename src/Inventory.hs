@@ -1,9 +1,10 @@
 module Inventory (openInventory) where
 
 import Types
-import Utils (parseAction)
+import Utils (parseActionInventory, getPlayerRoom, findRoom)
 import Control.Monad.State
-import Data.List (intercalate)
+import Data.List (find, intercalate)
+import Data.Char(toLower)
 
 -- | Display inventory and handle inventory interactions
 openInventory :: StateT GameState IO ()
@@ -33,13 +34,13 @@ inventoryInteraction :: StateT GameState IO ()
 inventoryInteraction = do
     liftIO $ putStrLn "Available actions: (Drop, Use, Inspect, Back)"
     action <- liftIO getLine
-    let parsedAction = parseAction action
+    let parsedAction = parseActionInventory action
 
     case parsedAction of
         Just (Drop itemName) -> dropItem itemName >> inventoryInteraction
         Just (UseItem itemName) -> useItem itemName >> inventoryInteraction
         Just (Inspect itemName) -> inspect itemName >> inventoryInteraction
-        Just Quit -> liftIO $ putStrLn "Exiting inventory."
+        Just Back -> liftIO $ putStrLn "Exiting inventory."
         Just _ -> do
             liftIO $ putStrLn "Invalid action, try again."
             inventoryInteraction
@@ -47,8 +48,32 @@ inventoryInteraction = do
             liftIO $ putStrLn "Invalid action, try again."
             inventoryInteraction
 
-dropItem, inspect, useItem ::
+inspect, useItem ::
     String -> StateT GameState IO ()
-dropItem _ = liftIO $ putStrLn "Drop action not implemented yet."
 inspect _ = liftIO $ putStrLn "Inspect action not implemented yet."
 useItem _ = liftIO $ putStrLn "UseItem action not implemented yet."
+
+dropItem :: String -> StateT GameState IO ()
+dropItem itemNameInput = do
+    state <- get
+    let player = playerState state
+    let currentRoom = getPlayerRoom player (world state)
+
+    -- Find the item in the player's inventory
+    let maybeItem = find (\item -> map toLower (itemName item) == map toLower itemNameInput) (inventory player)
+
+    case maybeItem of
+        Just item -> do
+            -- Remove the item from the player's inventory
+            let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory player)
+            let updatedPlayer = player { inventory = updatedInventory }
+
+            -- Add the item to the current room
+            let updatedRoomItems = item : items currentRoom
+            let updatedRoom = currentRoom { items = updatedRoomItems }
+            let updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world state)
+
+            -- Update the game state
+            put state { playerState = updatedPlayer, world = updatedWorld }
+            liftIO $ putStrLn $ "You dropped " ++ itemName item ++ "."
+        Nothing -> liftIO $ putStrLn "Item not found."

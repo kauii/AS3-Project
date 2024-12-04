@@ -2,7 +2,7 @@ module GameLoop (runGameLoop, parseAction) where
 
 import Types
 import Inventory (openInventory)
-import Utils (parseAction, parseDirection)
+import Utils (parseAction, parseDirection, getPlayerRoom, findRoom)
 import Control.Monad.State
 import InitialState
 import Data.Maybe (fromMaybe)
@@ -49,13 +49,10 @@ handleAction :: Action -> StateT GameState IO ()
 handleAction action = case action of
     Go dir           -> movePlayer dir
     Take itemName    -> takeItem itemName
-    Drop itemName    -> dropItem itemName
-    Inspect name     -> inspect name
     Attack enemyName -> attackEnemy enemyName
     TalkTo npcName   -> talkTo npcName
     OpenDoor doorName -> openDoor doorName
-    UseItem itemName -> useItem itemName
-    OpenInv          -> openInventory >> gameLoop
+    OpenInv          -> openInventory
     Quit             -> liftIO $ putStrLn "Goodbye!"
 
 -- | Move the player in a given direction
@@ -95,19 +92,10 @@ takeItem itemNameInput = do
         Nothing -> liftIO $ putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not in this room."
 
 -- | Stub functions for other actions
-dropItem, inspect, attackEnemy, talkTo, openDoor, useItem ::
+inspect, attackEnemy, talkTo, openDoor, useItem ::
     String -> StateT GameState IO ()
-dropItem _ = liftIO $ putStrLn "Drop action not implemented yet."
 inspect _ = liftIO $ putStrLn "Inspect action not implemented yet."
 attackEnemy _ = liftIO $ putStrLn "Attack action not implemented yet."
 talkTo _ = liftIO $ putStrLn "Talk action not implemented yet."
 openDoor _ = liftIO $ putStrLn "OpenDoor action not implemented yet."
 useItem _ = liftIO $ putStrLn "UseItem action not implemented yet."
-
--- | Find a room by name
-findRoom :: String -> [Room] -> Room
-findRoom name rooms = fromMaybe (error "Room not found!") (find (\r -> roomName r == name) rooms)
-
--- | Get the player's current room
-getPlayerRoom :: Player -> [Room] -> Room
-getPlayerRoom player = findRoom (location player)

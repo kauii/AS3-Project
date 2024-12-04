@@ -1,6 +1,8 @@
-module Utils (parseAction, parseDirection) where
+module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory) where
 
 import Types
+import Data.Maybe (fromMaybe)
+import Data.List(find)
 
 -- | Parse the user input into an Action
 parseAction :: String -> Maybe Action
@@ -26,3 +28,22 @@ parseDirection dir = case dir of
     "East"  -> Just East
     "West"  -> Just West
     _       -> Nothing
+
+-- | Find a room by name
+findRoom :: String -> [Room] -> Room
+findRoom name rooms = fromMaybe (error "Room not found!") (find (\r -> roomName r == name) rooms)
+
+-- | Get the player's current room
+getPlayerRoom :: Player -> [Room] -> Room
+getPlayerRoom player = findRoom (location player)
+
+
+-- | Parse the user input into an Action for Inventory Interaction
+parseActionInventory :: String -> Maybe Action
+parseActionInventory input =
+    case words input of
+        ("Drop" : itemWords) -> Just (Drop (unwords itemWords))
+        ("Inspect" : nameWords) -> Just (Inspect (unwords nameWords))
+        ("UseItem" : nameWords) -> Just (UseItem (unwords nameWords))
+        ["Back"] -> Just Back
+        _ -> Nothing
