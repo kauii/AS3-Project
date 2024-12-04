@@ -109,7 +109,9 @@ data Action = Go Direction         -- Move in a specific direction
             | TalkTo String        -- Talk to an NPC by name
             | OpenDoor String      -- Open a door by name
             | UseItem String       -- Use an item by name
+            | OpenInv              -- Opens the player's inventory
             | Quit                 -- Quit the game
+            | Back                 -- Go Back
             deriving (Show, Eq)
 
 

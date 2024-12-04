@@ -28,11 +28,12 @@ library
       FlagsUtils
       GameLoop
       InitialState
+      Inventory
       Lib
-      Main
       Printer
       RoomObjectInteraction
       Types
+      Utils
   other-modules:
       Paths_AS3_Project
   autogen-modules:
