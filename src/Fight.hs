@@ -34,16 +34,16 @@ combatLoop player enemies = do
         else if life player <= 0
             then do
                 liftIO $ putStrLn "You have been defeated..."
-                lift pressEnterToContinue
                 updatePlayerState player -- Update player's state to reflect death
-            else do
                 lift pressEnterToContinue
-                -- Print health bars for both player and enemies
-                liftIO $ printCombatHealthBars enemies player
-                -- Determine turn order based on agility
-                let combatants = determineTurnOrder player enemies
-                -- Process turns
-                processTurns combatants player enemies
+        else do
+            lift pressEnterToContinue
+            -- Print health bars for both player and enemies
+            liftIO $ printCombatHealthBars enemies player
+            -- Determine turn order based on agility
+            let combatants = determineTurnOrder player enemies
+            -- Process turns
+            processTurns combatants player enemies
 
 updatePlayerState :: Player -> StateT GameState IO ()
 updatePlayerState updatedPlayer = do
