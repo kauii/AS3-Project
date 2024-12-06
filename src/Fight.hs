@@ -9,6 +9,7 @@ import System.Random (randomRIO)
 
 enterCombat :: StateT GameState IO ()
 enterCombat = do
+    
     state <- get
     let player = playerState state
     let currentRoom = getPlayerRoom player (world state)
@@ -22,14 +23,29 @@ enterCombat = do
             
             combatLoop player enemiesInRoom
 
--- | Combat loop: Runs until combat ends
+
 combatLoop :: Player -> [Enemy] -> StateT GameState IO ()
-combatLoop player enemies = do
-    if null enemies
+combatLoop player enemiesCurrent = do
+    state <- get
+    let currentRoom = getPlayerRoom (playerState state) (world state)
+
+    if null enemiesCurrent
         then do
-            liftIO $ putStrLn "All enemies defeated!"
-            updatePlayerState player -- Update player's state after combat
-            notImplemented "Drop loot into the room."
+            -- Collect loot from defeated enemies
+            let defeatedLoot = collectLoot (enemies currentRoom)
+                updatedRoom = currentRoom 
+                              { enemies = []  -- Remove enemies from the room
+                              , items = items currentRoom ++ defeatedLoot -- Add loot to room's items
+                              }
+                updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world state)
+
+            -- Update the game state
+            put state { world = updatedWorld }
+
+            -- Notify the player
+            liftIO $ putStrLn "All enemies defeated! Loot has been added to the room:"
+            liftIO $ mapM_ (putStrLn . ("  - " ++) . itemName) defeatedLoot
+            
             lift pressEnterToContinue
         else if life player <= 0
             then do
@@ -39,11 +55,13 @@ combatLoop player enemies = do
         else do
             lift pressEnterToContinue
             -- Print health bars for both player and enemies
-            liftIO $ printCombatHealthBars enemies player
+            liftIO $ printCombatHealthBars enemiesCurrent player
             -- Determine turn order based on agility
-            let combatants = determineTurnOrder player enemies
+            let combatants = determineTurnOrder player enemiesCurrent
             -- Process turns
-            processTurns combatants player enemies
+            processTurns combatants player enemiesCurrent
+
+
 
 updatePlayerState :: Player -> StateT GameState IO ()
 updatePlayerState updatedPlayer = do
@@ -125,10 +143,18 @@ attemptFlee player enemies remainingCombatants = do
     if success <= 30  -- 30% success rate
         then do
             liftIO $ putStrLn "You successfully fled the battle!"
-            updatePlayerState player  -- Save any changes to the player's state
+
+            -- Sync remaining enemies with the room
+            state <- get
+            let currentRoom = getPlayerRoom (playerState state) (world state)
+                updatedRoom = currentRoom { enemies = enemies }  -- Keep remaining enemies
+                updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world state)
+
+            put state { world = updatedWorld }
         else do
             liftIO $ putStrLn "Flee attempt failed! The battle continues."
             processTurns remainingCombatants player enemies
+
 
 -- | Print health bars for enemies and player
 printCombatHealthBars :: [Enemy] -> Player -> IO ()
@@ -153,6 +179,11 @@ generateHealthBar :: Int -> Int -> Int -> String
 generateHealthBar currentHealth maxHealth barLength =
     let filledLength = (currentHealth * barLength) `div` maxHealth
         emptyLength = barLength - filledLength
-        percentage = (currentHealth * 100) `div` maxHealth
-    in replicate filledLength '█' ++ replicate emptyLength '░' ++ " (" ++ show percentage ++ "%)"
+    in replicate filledLength '█' ++ replicate emptyLength '░' ++ 
+       " (" ++ show currentHealth ++ "/" ++ show maxHealth ++ ")"
+
+
+-- | Collect loot from all defeated enemies
+collectLoot :: [Enemy] -> [Item]
+collectLoot enemies = concatMap loot enemies
 
