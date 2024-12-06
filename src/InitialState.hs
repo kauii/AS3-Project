@@ -25,15 +25,17 @@ object1 = RoomObject {
 
 -- A sample room
 startingRoom :: Room
-startingRoom = Room
-    { roomName = "Starting Room"
-    , description = "A small, dimly lit room with stone walls. There's a wooden door to the north."
-    , exits = [(North, "Hallway")]
-    , roomObjects = [object1]
-    , items = [healthPotion, rustyKey]
-    , enemies = []
-    , doors = [woodenDoor]
-    }
+startingRoom = Room {
+    roomName = "Starting Room",
+    description = "A small, dimly lit room with stone walls.",
+    exits = [(North, "Hallway")],
+    roomObjects = [],
+    items = [healthPotion, rustyKey, goldCoin],
+    enemies = [],
+    doors = [woodenDoor],
+    npcs = [questGiver, villager]
+}
+
 
 hallway :: Room
 hallway = Room
@@ -104,6 +106,32 @@ woodenDoor = Door
     , isLocked = True
     , keyRequired = Just "Rusty Key"
     }
+
+-- Example: Quest Giver requiring a "Gold Coin"
+questGiver :: NPC
+questGiver = NPC {
+    npcName = "Quest Giver",
+    requiredItem = Just "Gold Coin",
+    onInteraction = do
+        modify (\gs -> gs { flags = Map.insert "quest_completed" True (flags gs) })
+        liftIO $ putStrLn "Thank you for the Gold Coin! I grant you a Potion."
+        state <- get
+        let player = playerState state
+        let rewardItem = Item "Potion" "Restores health" Nothing
+        let updatedInventory = rewardItem : inventory player
+        put state { playerState = player { inventory = updatedInventory } },
+    dialogUnavailable = "I could really use a Gold Coin right now. Can you find one?"
+}
+
+-- Example: Villager with no requirements
+villager :: NPC
+villager = NPC {
+    npcName = "Villager",
+    requiredItem = Nothing,
+    onInteraction = liftIO $ putStrLn "Hello, traveler! Stay safe out there.",
+    dialogUnavailable = "Hello, traveler! Stay safe out there." -- Same as available dialog
+}
+
 
 -- Initial player state
 initialPlayer :: Player

@@ -2,6 +2,7 @@ module Types (
     Direction(..),
     Room(..),
     RoomObject(..),
+    NPC(..),
     Item(..),
     Effect(..),
     Player(..),
@@ -28,7 +29,8 @@ data Room = Room {
     exits :: [(Direction, String)], -- Possible exits (Direction, connected room name)
     items :: [Item],               -- Items in the room
     enemies :: [Enemy],            -- Enemies present in the room
-    doors :: [Door]                -- Doors connected to this room
+    doors :: [Door],                -- Doors connected to this room
+    npcs :: [NPC]
 } deriving (Show)
 
 data RoomObject = RoomObject {
@@ -37,6 +39,14 @@ data RoomObject = RoomObject {
     roomObjectItems :: [Item],
     roomActions :: [(String, String -> StateT GameState IO ())]
 }
+
+data NPC = NPC {
+    npcName :: String,                            -- Name of the NPC
+    requiredItem :: Maybe String,                -- Item the NPC needs (if any)
+    onInteraction :: StateT GameState IO (),     -- Function to execute when the item is given
+    dialogUnavailable :: String                  -- Dialog if the item is not present
+}
+
 
 -- Items, which can have effects when used
 data Item = Item {
@@ -122,3 +132,11 @@ instance Show RoomObject where
         "descriptions = " ++ show descs ++ ", " ++
         "roomObjectItems = " ++ show items ++ ", " ++
         "roomActions = <functions> }"
+
+instance Show NPC where
+    show npc = unlines [
+        "NPC: " ++ npcName npc,
+        "  Required Item: " ++ maybe "None" id (requiredItem npc),
+        "  Dialog when item unavailable: " ++ dialogUnavailable npc
+        -- You can't directly show `onInteraction` because it's a function
+        ]

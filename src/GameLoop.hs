@@ -122,12 +122,32 @@ takeItem itemNameInput = do
             liftIO $ putStrLn $ "Added " ++ itemName item ++ " to your inventory."
         Nothing -> liftIO $ putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not in this room."
 
--- | Stub functions for other actions
-attackEnemy, talkTo, openDoor, useItem ::
-    String -> StateT GameState IO ()
+talkTo :: String -> StateT GameState IO ()
+talkTo npcNameInput = do
+    state <- get
+    let currentRoom = getPlayerRoom (playerState state) (world state)
+    let maybeNPC = find (\npc -> map toLower (npcName npc) == map toLower npcNameInput) (npcs currentRoom)
+    case maybeNPC of
+        Just npc -> do
+            case requiredItem npc of
+                Just cItemName -> do
+                    let player = playerState state
+                    let maybeItem = find (\item -> itemName item == cItemName) (inventory player)
+                    case maybeItem of
+                        Just _ -> do
+                            -- Remove item and execute interaction
+                            let updatedInventory = filter (\item -> itemName item /= cItemName) (inventory player)
+                            put state { playerState = player { inventory = updatedInventory } }
+                            onInteraction npc
+                        Nothing -> liftIO $ putStrLn $ dialogUnavailable npc
+                Nothing -> onInteraction npc -- No item required, execute interaction
+        Nothing -> liftIO $ putStrLn "There's no one by that name here."
 
+
+-- | Stub functions for other actions
+attackEnemy, openDoor, useItem ::
+    String -> StateT GameState IO ()
 attackEnemy _ = liftIO $ putStrLn "Attack action not implemented yet."
-talkTo _ = liftIO $ putStrLn "Talk action not implemented yet."
 openDoor _ = liftIO $ putStrLn "OpenDoor action not implemented yet."
 useItem _ = liftIO $ putStrLn "UseItem action not implemented yet."
 
