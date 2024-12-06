@@ -108,7 +108,7 @@ data Action = Go Direction         -- Move in a specific direction
             | Take String          -- Pick up an item by name
             | Drop String          -- Drop an item by name
             | Inspect String       -- Inspect an item, NPC, or environment
-            | Attack String        -- Attack an enemy by name
+            | Attack               -- Enter Attack Mode
             | TalkTo String        -- Talk to an NPC by name
             | OpenDoor String      -- Open a door by name
             | UseItem String       -- Use an item by name

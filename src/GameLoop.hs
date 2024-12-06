@@ -51,12 +51,13 @@ gameLoop = do
 handleAction :: Action -> StateT GameState IO ()
 handleAction action = case action of
     Go dir           -> movePlayer dir
-    Take item    -> takeItem item
-    Attack enemy -> attackEnemy enemy
+    Take item -> takeItem item
     TalkTo npcName   -> talkTo npcName
     Inspect object -> inspect object
     OpenDoor door -> openDoor door
-    OpenInv          -> openInventory
+    OpenInv -> do
+        updatedPlayer <- openInventory False  -- Get the updated player state
+        modify (\updatedState -> updatedState { playerState = updatedPlayer })  -- Update the game state
     _             -> liftIO $ putStrLn "Goodbye!"
 
 -- | Move the player in a given direction

@@ -1,10 +1,12 @@
-module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight) where
+module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded) where
 
 import Types
 import Data.Maybe (fromMaybe)
 import Data.List(find)
 import Data.Char(toLower)
 import qualified Data.Map as Map
+import Control.Monad.State
+
 
 -- | Parse the user input into an Action
 parseAction :: String -> Maybe Action
@@ -14,7 +16,6 @@ parseAction input =
         ("take" : itemWords) -> Just (Take (unwords itemWords))
         ("drop" : itemWords) -> Just (Drop (unwords itemWords))
         ("inspect" : nameWords) -> Just (Inspect (unwords nameWords))
-        ("attack" : nameWords) -> Just (Attack (unwords nameWords))
         ("talkto" : nameWords) -> Just (TalkTo (unwords nameWords))
         ("opendoor" : nameWords) -> Just (OpenDoor (unwords nameWords))
         ("useitem" : nameWords) -> Just (UseItem (unwords nameWords))
@@ -55,8 +56,8 @@ parseActionInventory input =
 parseActionFight :: String -> Maybe Action
 parseActionFight input =
     case words (map toLower input) of  -- Normalize the input to lowercase
-        ["attack"] -> Just (Attack "enemy")  -- Assuming "enemy" will be replaced by a specific target
-        ("use" : itemWords) -> Just (UseItem (unwords itemWords))
+        ["attack"] -> Just Attack  -- Assuming "enemy" will be replaced by a specific target
+        ["openinv"] -> Just OpenInv
         ["flee"] -> Just Flee
         _ -> Nothing
 
@@ -108,3 +109,17 @@ displayHeader caption = do
     putStrLn $ "╔" ++ border ++ "╗"
     putStrLn $ "║  " ++ caption ++ "  ║"
     putStrLn $ "╚" ++ border ++ "╝"
+
+-- | Set the "turnEnded" flag
+setTurnEnded :: Bool -> StateT GameState IO ()
+setTurnEnded value = do
+    state <- get
+    let updatedFlags = Map.insert "turnEnded" value (flags state)
+    put state { flags = updatedFlags }
+
+-- | Check if the "turnEnded" flag is set
+isTurnEnded :: StateT GameState IO Bool
+isTurnEnded = do
+    state <- get
+    return $ Map.findWithDefault False "turnEnded" (flags state)
+

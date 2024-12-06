@@ -1,6 +1,7 @@
 module Fight (enterCombat) where
 
 import Data.List (sortOn)
+import Inventory
 import Types
 import Utils
 import Control.Monad.State
@@ -57,26 +58,36 @@ determineTurnOrder player enemies =
     in reverse $ sortOn (\(_, ag, _) -> ag) (("Player", playerAgility, Nothing) : enemiesAgility)
 
 processTurns :: [(String, Int, Maybe Enemy)] -> Player -> [Enemy] -> StateT GameState IO ()
-processTurns [] player enemies = combatLoop player enemies
-processTurns ((name, _, Nothing) : rest) player enemies = do
+processTurns [] player enemies = combatLoop player enemies  -- Recurse back into the combat loop when all turns are processed
+processTurns ((name, _, Nothing) : rest) player enemies = do  -- Player's turn
+    setTurnEnded False
     liftIO $ putStrLn $ "\n" ++ name ++ "'s turn (Player)"
-    liftIO $ putStrLn "Actions available: (Attack, Use Item, Flee)"
+    liftIO $ putStrLn "Actions available: (Attack, OpenInv, Flee)"
     action <- liftIO getLine
     let parsedAction = parseActionFight action
     case parsedAction of
-        Just (Attack _) -> do
+        Just Attack -> do
             updatedEnemies <- attackEnemy player enemies
             processTurns rest player updatedEnemies
-        Just (UseItem _) -> notImplemented "Player uses an item."
-        Just Flee -> attemptFlee player enemies rest  -- Pass the remaining combatants
+        Just OpenInv -> do
+            updatedPlayer <- openInventory True
+            turnEnded <- isTurnEnded
+            if turnEnded
+                then processTurns rest updatedPlayer enemies
+                else processTurns ((name, agility (stats updatedPlayer), Nothing) : rest) updatedPlayer enemies
+        Just Flee -> attemptFlee player enemies rest  -- Handle flee action
         _ -> do
             liftIO $ putStrLn "Invalid action. Try again."
             processTurns ((name, agility (stats player), Nothing) : rest) player enemies
-processTurns ((name, _, Just enemy) : rest) player enemies = do
+processTurns ((name, _, Just enemy) : rest) player enemies = do  -- Enemy's turn
     liftIO $ putStrLn $ "\n" ++ name ++ "'s turn (Enemy)"
     updatedPlayer <- enemyTurn player enemy
-    updatePlayerState updatedPlayer -- Update player's health after the enemy's turn
+    updatePlayerState updatedPlayer
     processTurns rest updatedPlayer enemies
+processTurns _ player enemies = do  -- Fallback case for unexpected inputs
+    liftIO $ putStrLn "An error occurred in processing turns. Resuming combat loop."
+    combatLoop player enemies
+
 
 
 

@@ -3,59 +3,65 @@ module Inventory (openInventory) where
 import Types
 import Utils
 import Control.Monad.State
+import Control.Monad(when)
 import Data.List (find)
 import Data.Char(toLower)
 import Data.Maybe(isJust)
 import Control.Applicative((<|>))
 
--- | Display inventory and handle inventory interactions
-openInventory :: StateT GameState IO ()
-openInventory = do
+openInventory :: Bool -> StateT GameState IO Player
+openInventory inCombat = do
     state <- get
     let player = playerState state
 
-    -- Display header
+    -- Display header and stats
     liftIO $ displayHeader "INVENTORY"
-
-    -- Display player stats
     liftIO $ putStrLn "Player Stats:"
     liftIO $ putStrLn $ "  Life: " ++ show (life player) ++ "/" ++ show (vitality (stats player))
     liftIO $ putStrLn $ "  Attack: " ++ show (attack (stats player))
     liftIO $ putStrLn $ "  Defense: " ++ show (defense (stats player))
     liftIO $ putStrLn $ "  Agility: " ++ show (agility (stats player))
 
-
     -- Display inventory
     let inventoryItems = inventory player
     liftIO $ if null inventoryItems
         then putStrLn "Your inventory is empty."
-        else do
-            putStrLn "Inventory:"
-            mapM_ (putStrLn . ("  - " ++) . itemName) inventoryItems
+        else mapM_ (putStrLn . ("  - " ++) . itemName) inventoryItems
 
-    -- Enter inventory interaction
-    inventoryInteraction
+    -- Enter inventory interaction and return updated player
+    inventoryInteraction inCombat player
 
 
--- | Handle inventory interaction actions
-inventoryInteraction :: StateT GameState IO ()
-inventoryInteraction = do
-    liftIO $ putStrLn "Available actions: (Drop, Use, Inspect, Back)"
+
+
+
+inventoryInteraction :: Bool -> Player -> StateT GameState IO Player
+inventoryInteraction inCombat player = do
+    let availableActions = if inCombat
+                           then "Available actions: (Use, Inspect, Back)"
+                           else "Available actions: (Drop, Use, Inspect, Back)"
+    liftIO $ putStrLn availableActions
     action <- liftIO getLine
     let parsedAction = parseActionInventory action
 
     case parsedAction of
-        Just (Drop itemName) -> dropItem itemName >> openInventory
-        Just (UseItem itemName) -> useItem itemName >> openInventory
-        Just (Inspect itemName) -> inspect itemName >> openInventory
-        Just Back -> liftIO $ putStrLn "Exiting inventory."
-        Just _ -> do
+        Just (Drop itemName)
+            | not inCombat -> dropItem itemName >> openInventory inCombat
+            | otherwise -> restrictedAction "Drop" >> return player
+        Just (UseItem itemName) -> do
+            useItem itemName
+            getPlayerState -- Return updated player state
+        Just (Inspect itemName) -> do
+            inspect itemName
+            inventoryInteraction inCombat player
+        Just Back -> return player
+        _ -> do
             liftIO $ putStrLn "Invalid action, try again."
-            inventoryInteraction
-        Nothing -> do
-            liftIO $ putStrLn "Invalid action, try again."
-            inventoryInteraction
+            inventoryInteraction inCombat player
 
+
+restrictedAction :: String -> StateT GameState IO ()
+restrictedAction action = liftIO $ putStrLn $ action ++ " is not allowed in combat!"
 
 dropItem :: String -> StateT GameState IO ()
 dropItem itemNameInput = do
@@ -123,7 +129,6 @@ useItem itemNameInput = do
             case effect item of
                 Nothing -> liftIO $ do
                     putStrLn $ "The item \"" ++ itemName item ++ "\" has no effects and cannot be used."
-                    pressEnterToContinue
                 Just eff ->
                     if isEffectUsable eff
                         then do
@@ -131,21 +136,23 @@ useItem itemNameInput = do
                             let newPlayer = applyEffect eff player
 
                             -- Remove the used item from the inventory
-                            let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory player)
+                            let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory newPlayer)
 
-                            -- Update the game state
-                            put state { playerState = newPlayer { inventory = updatedInventory } }
+                            -- Update the `playerState` with modified inventory
+                            let finalPlayer = newPlayer { inventory = updatedInventory }
+                            put state { playerState = finalPlayer }
+
+                            -- Mark the turn as ended
+                            setTurnEnded True
 
                             liftIO $ do
                                 putStrLn $ "You used the " ++ itemName item ++ "."
                                 putStrLn "Effects applied!"
-                                pressEnterToContinue
                         else liftIO $ do
                             putStrLn $ "The item \"" ++ itemName item ++ "\" cannot be used."
-                            pressEnterToContinue
-        Nothing -> liftIO $ do
-            putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not in your inventory."
-            pressEnterToContinue
+        Nothing -> liftIO $ putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not in your inventory."
+
+
 
 isEffectUsable :: Effect -> Bool
 isEffectUsable eff = isJust (modifyStats eff) || isJust (heal eff)
@@ -171,4 +178,7 @@ applyEffect effect player =
 
     in player { stats = updatedStats, life = updatedLife }
 
+getPlayerState :: StateT GameState IO Player
+getPlayerState = do
+    playerState <$> get
 
