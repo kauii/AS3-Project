@@ -6,7 +6,6 @@ import Utils
 import Control.Monad.State
 import System.Random (randomRIO)
 
--- | Enter combat when the room contains enemies
 enterCombat :: StateT GameState IO ()
 enterCombat = do
     state <- get
@@ -45,7 +44,6 @@ combatLoop player enemies = do
                 -- Process turns
                 processTurns combatants player enemies
 
--- | Update the player's state in the game state
 updatePlayerState :: Player -> StateT GameState IO ()
 updatePlayerState updatedPlayer = do
     state <- get
@@ -58,12 +56,11 @@ determineTurnOrder player enemies =
         enemiesAgility = map (\e -> (enemyName e, enemyAgility e, Just e)) enemies
     in reverse $ sortOn (\(_, ag, _) -> ag) (("Player", playerAgility, Nothing) : enemiesAgility)
 
--- | Process turns
 processTurns :: [(String, Int, Maybe Enemy)] -> Player -> [Enemy] -> StateT GameState IO ()
 processTurns [] player enemies = combatLoop player enemies
 processTurns ((name, _, Nothing) : rest) player enemies = do
     liftIO $ putStrLn $ "\n" ++ name ++ "'s turn (Player)"
-    liftIO $ putStrLn "Actions available: (Attack, UseItem, Flee)"
+    liftIO $ putStrLn "Actions available: (Attack, Use Item, Flee)"
     action <- liftIO getLine
     let parsedAction = parseActionFight action
     case parsedAction of
@@ -71,7 +68,7 @@ processTurns ((name, _, Nothing) : rest) player enemies = do
             updatedEnemies <- attackEnemy player enemies
             processTurns rest player updatedEnemies
         Just (UseItem _) -> notImplemented "Player uses an item."
-        Just Flee -> notImplemented "Player attempts to flee."
+        Just Flee -> attemptFlee player enemies rest  -- Pass the remaining combatants
         _ -> do
             liftIO $ putStrLn "Invalid action. Try again."
             processTurns ((name, agility (stats player), Nothing) : rest) player enemies
@@ -81,11 +78,12 @@ processTurns ((name, _, Just enemy) : rest) player enemies = do
     updatePlayerState updatedPlayer -- Update player's health after the enemy's turn
     processTurns rest updatedPlayer enemies
 
+
+
 -- | Placeholder function to handle unimplemented features
 notImplemented :: String -> StateT GameState IO ()
 notImplemented message = liftIO $ putStrLn $ "Feature not implemented yet: " ++ message
 
--- | Enemy performs an attack on the player
 enemyTurn :: Player -> Enemy -> StateT GameState IO Player
 enemyTurn player enemy = do
     let damage = max 1 (enemyAttack enemy - defense (stats player))  -- Calculate damage
@@ -94,7 +92,6 @@ enemyTurn player enemy = do
     liftIO $ putStrLn $ enemyName enemy ++ " attacked you for " ++ show damage ++ " damage!"
     return updatedPlayer
 
--- | Player attacks an enemy
 attackEnemy :: Player -> [Enemy] -> StateT GameState IO [Enemy]
 attackEnemy player enemies = do
     liftIO $ putStrLn "Choose an enemy to attack:"
@@ -110,6 +107,17 @@ attackEnemy player enemies = do
         _ -> do
             liftIO $ putStrLn "Invalid choice. Try again."
             attackEnemy player enemies
+
+attemptFlee :: Player -> [Enemy] -> [(String, Int, Maybe Enemy)] -> StateT GameState IO ()
+attemptFlee player enemies remainingCombatants = do
+    success <- liftIO $ randomRIO (1 :: Int, 100 :: Int)  -- Generate a random Int between 1 and 100
+    if success <= 30  -- 30% success rate
+        then do
+            liftIO $ putStrLn "You successfully fled the battle!"
+            updatePlayerState player  -- Save any changes to the player's state
+        else do
+            liftIO $ putStrLn "Flee attempt failed! The battle continues."
+            processTurns remainingCombatants player enemies
 
 -- | Print health bars for enemies and player
 printCombatHealthBars :: [Enemy] -> Player -> IO ()
