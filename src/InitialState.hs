@@ -42,7 +42,7 @@ hallway = Room
     , exits = [(South, "Starting Room"), (East, "Armory")]
     , roomObjects = []
     , items = [mysteriousPotion]
-    , enemies = [goblin]
+    , enemies = [goblin, ghoul]
     , doors = []
     }
 
@@ -105,6 +105,18 @@ goblin = Enemy
     , loot = [goldCoin]
     }
 
+-- Sample enemy
+ghoul :: Enemy
+ghoul = Enemy
+    { enemyName = "Ghoul"
+    , enemyHealth = 25
+    , enemyMaxHealth = 25
+    , enemyAttack = 5
+    , enemyDefense = 10
+    , enemyAgility = 21
+    , loot = [goldCoin]
+    }
+
 goldCoin :: Item
 goldCoin = Item
     { itemName = "Gold Coin"
@@ -127,7 +139,7 @@ initialPlayer = Player
     { location = "Starting Room"
     , inventory = []
     , life = 90
-    , stats = PlayerStats { vitality = 100, attack = 10, defense = 5, agility = 20 }
+    , stats = PlayerStats { vitality = 100, attack = 20, defense = 5, agility = 20 }
     , quests = []
     }
 

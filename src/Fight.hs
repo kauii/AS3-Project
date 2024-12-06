@@ -19,6 +19,7 @@ enterCombat = do
         else do
             liftIO $ displayHeader "Combat"
             liftIO $ putStrLn "Enemies spotted!\n"
+            
             combatLoop player enemiesInRoom
 
 -- | Combat loop: Runs until combat ends
@@ -29,11 +30,14 @@ combatLoop player enemies = do
             liftIO $ putStrLn "All enemies defeated!"
             updatePlayerState player -- Update player's state after combat
             notImplemented "Drop loot into the room."
+            lift pressEnterToContinue
         else if life player <= 0
             then do
                 liftIO $ putStrLn "You have been defeated..."
+                lift pressEnterToContinue
                 updatePlayerState player -- Update player's state to reflect death
             else do
+                lift pressEnterToContinue
                 -- Print health bars for both player and enemies
                 liftIO $ printCombatHealthBars enemies player
                 -- Determine turn order based on agility
@@ -58,8 +62,8 @@ determineTurnOrder player enemies =
 processTurns :: [(String, Int, Maybe Enemy)] -> Player -> [Enemy] -> StateT GameState IO ()
 processTurns [] player enemies = combatLoop player enemies
 processTurns ((name, _, Nothing) : rest) player enemies = do
-    liftIO $ putStrLn $ name ++ "'s turn (Player)"
-    liftIO $ putStrLn "Actions available: (Attack, Use Item, Flee)"
+    liftIO $ putStrLn $ "\n" ++ name ++ "'s turn (Player)"
+    liftIO $ putStrLn "Actions available: (Attack, UseItem, Flee)"
     action <- liftIO getLine
     let parsedAction = parseActionFight action
     case parsedAction of
@@ -72,7 +76,7 @@ processTurns ((name, _, Nothing) : rest) player enemies = do
             liftIO $ putStrLn "Invalid action. Try again."
             processTurns ((name, agility (stats player), Nothing) : rest) player enemies
 processTurns ((name, _, Just enemy) : rest) player enemies = do
-    liftIO $ putStrLn $ name ++ "'s turn (Enemy)"
+    liftIO $ putStrLn $ "\n" ++ name ++ "'s turn (Enemy)"
     updatedPlayer <- enemyTurn player enemy
     updatePlayerState updatedPlayer -- Update player's health after the enemy's turn
     processTurns rest updatedPlayer enemies
@@ -84,7 +88,7 @@ notImplemented message = liftIO $ putStrLn $ "Feature not implemented yet: " ++ 
 -- | Enemy performs an attack on the player
 enemyTurn :: Player -> Enemy -> StateT GameState IO Player
 enemyTurn player enemy = do
-    let damage = max 0 (enemyAttack enemy - defense (stats player))  -- Calculate damage
+    let damage = max 1 (enemyAttack enemy - defense (stats player))  -- Calculate damage
     let updatedLife = max 0 (life player - damage)  -- Reduce player's life
     let updatedPlayer = player { life = updatedLife }
     liftIO $ putStrLn $ enemyName enemy ++ " attacked you for " ++ show damage ++ " damage!"
@@ -99,7 +103,7 @@ attackEnemy player enemies = do
     case reads choice of
         [(i, "")] | i > 0 && i <= length enemies -> do
             let target = enemies !! (i - 1)
-            let damage = max 0 (attack (stats player) - enemyDefense target)  -- Calculate damage
+            let damage = max 1 (attack (stats player) - enemyDefense target)  -- Calculate damage
             let updatedEnemies = map (\e -> if e == target then e { enemyHealth = max 0 (enemyHealth e - damage) } else e) enemies
             liftIO $ putStrLn $ "You dealt " ++ show damage ++ " damage to " ++ enemyName target ++ "!"
             return $ filter (\e -> enemyHealth e > 0) updatedEnemies  -- Remove dead enemies
@@ -107,24 +111,29 @@ attackEnemy player enemies = do
             liftIO $ putStrLn "Invalid choice. Try again."
             attackEnemy player enemies
 
+-- | Print health bars for enemies and player
+printCombatHealthBars :: [Enemy] -> Player -> IO ()
+printCombatHealthBars enemies player = do
+    -- Print enemies section
+    displayHeader "ENEMIES"
+    mapM_ printEnemyHealth enemies
+
+    -- Print player section
+    displayHeader "PLAYER"
+    putStrLn $ generateHealthBar (life player) (vitality (stats player)) 20
+
+-- | Print a single enemy's health with a newline after each
+printEnemyHealth :: Enemy -> IO ()
+printEnemyHealth enemy = do
+    putStrLn $ "- " ++ enemyName enemy
+    putStrLn $ generateHealthBar (enemyHealth enemy) (enemyMaxHealth enemy) 20
+    putStrLn ""  -- Add a blank line after each enemy
+
 -- | Generate a single health bar
 generateHealthBar :: Int -> Int -> Int -> String
 generateHealthBar currentHealth maxHealth barLength =
     let filledLength = (currentHealth * barLength) `div` maxHealth
         emptyLength = barLength - filledLength
         percentage = (currentHealth * 100) `div` maxHealth
-    in replicate filledLength '█' ++ replicate emptyLength '░' ++ "  (" ++ show percentage ++ "%)"
+    in replicate filledLength '█' ++ replicate emptyLength '░' ++ " (" ++ show percentage ++ "%)"
 
--- | Print health bars for enemies and player
-printCombatHealthBars :: [Enemy] -> Player -> IO ()
-printCombatHealthBars enemies player = do
-    -- Print enemy names
-    putStrLn $ unwords $ map enemyName enemies
-    
-    -- Print enemy health bars, treating `enemyHealth` as the max health
-    let enemyBars = map (\e -> generateHealthBar (enemyHealth e) (enemyMaxHealth e) 10) enemies
-    putStrLn $ unwords enemyBars
-    
-    -- Print player info
-    putStrLn "\nPlayer"
-    putStrLn $ generateHealthBar (life player) (vitality (stats player)) 20
