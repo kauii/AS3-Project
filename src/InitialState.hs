@@ -98,7 +98,8 @@ goblin :: Enemy
 goblin = Enemy
     { enemyName = "Goblin"
     , enemyHealth = 30
-    , enemyAttack = 5
+    , enemyMaxHealth = 30
+    , enemyAttack = 10
     , enemyDefense = 2
     , enemyAgility = 10
     , loot = [goldCoin]

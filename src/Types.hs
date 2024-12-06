@@ -80,6 +80,7 @@ data Quest = Quest {
 data Enemy = Enemy {
     enemyName :: String,           -- Name of the enemy
     enemyHealth :: Int,            -- Enemy's health
+    enemyMaxHealth :: Int,
     enemyAttack :: Int,            -- Enemy's attack power
     enemyDefense :: Int,           -- Enemy's defense
     enemyAgility :: Int,           -- Enemy's agility for turn order
