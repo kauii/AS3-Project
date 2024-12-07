@@ -43,8 +43,8 @@ hallway = Room
     , description = "A long corridor with flickering torches on the walls. You can see another door to the east."
     , exits = [(South, "Starting Room"), (East, "Armory")]
     , roomObjects = []
-    , items = []
-    , enemies = [goblin]
+    , items = [mysteriousPotion]
+    , enemies = [goblin, ghoul]
     , doors = []
     }
 
@@ -67,6 +67,20 @@ healthPotion = Item
     , effect = Just $ Effect { modifyStats = Nothing, heal = Just 20, unlockDoor = Nothing }
     }
 
+-- Sample items
+mysteriousPotion :: Item
+mysteriousPotion = Item
+    { itemName = "Mysterious Potion"
+    , itemDescription = "A strong smelly potion. The liquid is so opaque, you can barely see through. "
+    , effect = Just $ Effect { modifyStats = Just PlayerStats 
+            { vitality = 10
+            , attack = -5
+            , defense = 0
+            , agility = 0 }
+            , heal = Nothing
+            , unlockDoor = Nothing }
+    }
+
 rustyKey :: Item
 rustyKey = Item
     { itemName = "Rusty Key"
@@ -86,8 +100,22 @@ goblin :: Enemy
 goblin = Enemy
     { enemyName = "Goblin"
     , enemyHealth = 30
-    , enemyAttack = 5
+    , enemyMaxHealth = 30
+    , enemyAttack = 10
     , enemyDefense = 2
+    , enemyAgility = 10
+    , loot = [goldCoin]
+    }
+
+-- Sample enemy
+ghoul :: Enemy
+ghoul = Enemy
+    { enemyName = "Ghoul"
+    , enemyHealth = 25
+    , enemyMaxHealth = 25
+    , enemyAttack = 5
+    , enemyDefense = 10
+    , enemyAgility = 21
     , loot = [goldCoin]
     }
 
@@ -138,9 +166,8 @@ initialPlayer :: Player
 initialPlayer = Player
     { location = "Starting Room"
     , inventory = []
-    , life = 100
-    , maxLife = 100
-    , stats = PlayerStats { attack = 10, defense = 5 }
+    , life = 90
+    , stats = PlayerStats { vitality = 100, attack = 20, defense = 5, agility = 20 }
     , quests = []
     }
 

@@ -15,7 +15,6 @@ module Types (
 ) where
 
 import Control.Monad.State
-import Data.Map (Map)
 import qualified Data.Map as Map
 
 -- Directions for navigation
@@ -53,27 +52,28 @@ data Item = Item {
     itemName :: String,            -- Name of the item
     itemDescription :: String,     -- Description of the item
     effect :: Maybe Effect         -- Effect the item has when used (if any)
-} deriving (Show)
+} deriving (Show, Eq)
 
 -- Effects of items, which can modify player stats or state
 data Effect = Effect {
     modifyStats :: Maybe PlayerStats, -- Changes to player stats (e.g., +ATK, +DEF)
     heal :: Maybe Int,                -- Healing amount for the player
     unlockDoor :: Maybe String        -- Unlock a door with this name
-} deriving (Show)
+} deriving (Show, Eq)
 
 -- Player stats, such as attack and defense
 data PlayerStats = PlayerStats {
+    vitality :: Int,
     attack :: Int,                 -- Player's attack power
-    defense :: Int               -- Player's defense power
-} deriving (Show)
+    defense :: Int,               -- Player's defense power
+    agility :: Int
+} deriving (Show, Eq)
 
 -- Player state, tracking the player's progress
 data Player = Player {
     location :: String,            -- Current room name
     inventory :: [Item],           -- Items the player carries
     life :: Int,                   -- Player's current life
-    maxLife :: Int,                -- Player's maximum life
     stats :: PlayerStats,          -- The player's stats
     quests :: [Quest]              -- List of quests the player is working on
 } deriving (Show)
@@ -89,11 +89,14 @@ data Quest = Quest {
 -- Enemies in the game, which can be placed in rooms
 data Enemy = Enemy {
     enemyName :: String,           -- Name of the enemy
-    enemyHealth :: Int,                 -- Enemy's health
+    enemyHealth :: Int,            -- Enemy's health
+    enemyMaxHealth :: Int,
     enemyAttack :: Int,            -- Enemy's attack power
-    enemyDefense :: Int,                -- Enemy's defense
+    enemyDefense :: Int,           -- Enemy's defense
+    enemyAgility :: Int,           -- Enemy's agility for turn order
     loot :: [Item]                 -- Items dropped upon defeat
-} deriving (Show)
+} deriving (Show, Eq)
+
 
 -- Doors connecting rooms
 data Door = Door {
@@ -115,13 +118,14 @@ data Action = Go Direction         -- Move in a specific direction
             | Take String          -- Pick up an item by name
             | Drop String          -- Drop an item by name
             | Inspect String       -- Inspect an item, NPC, or environment
-            | Attack String        -- Attack an enemy by name
+            | Attack               -- Enter Attack Mode
             | TalkTo String        -- Talk to an NPC by name
             | OpenDoor String      -- Open a door by name
             | UseItem String       -- Use an item by name
             | OpenInv              -- Opens the player's inventory
             | Quit                 -- Quit the game
             | Back                 -- Go Back
+            | Flee                 -- Attempt to flee combat
             deriving (Show, Eq)
 
 
