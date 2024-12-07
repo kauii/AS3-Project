@@ -22,6 +22,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 - mtl
+- random
 
 ghc-options:
 - -Wall
@@ -39,6 +40,7 @@ library:
   dependencies:
   - base
   - mtl
+  - random
   - containers
 
 executables:
@@ -52,6 +54,7 @@ executables:
     dependencies:
     - AS3-Project
     - mtl
+    - random
     - containers
 
 tests:

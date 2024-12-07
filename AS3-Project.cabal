@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Fight
       FlagsUtils
       GameLoop
       InitialState
@@ -45,6 +46,7 @@ library
       base
     , containers
     , mtl
+    , random
   default-language: Haskell2010
 
 executable AS3-Project-exe
@@ -61,6 +63,7 @@ executable AS3-Project-exe
     , base >=4.7 && <5
     , containers
     , mtl
+    , random
   default-language: Haskell2010
 
 test-suite AS3-Project-test
@@ -77,4 +80,5 @@ test-suite AS3-Project-test
       AS3-Project
     , base >=4.7 && <5
     , mtl
+    , random
   default-language: Haskell2010
