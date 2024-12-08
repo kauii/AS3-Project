@@ -1,4 +1,4 @@
-module InitialState (initialState) where
+module Assets.InitialState (initialState) where
 
 import Types
 import Control.Monad.State

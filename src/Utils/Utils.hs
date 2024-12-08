@@ -1,6 +1,14 @@
-module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded, printCombatHealthBars, generateHealthBar) where
+module Utils.Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded, printCombatHealthBars, generateHealthBar) where
 
 import Types
+    ( Action(..),
+      GameState(flags),
+      Enemy(enemyMaxHealth, enemyName, enemyHealth),
+      Player(stats, location, life),
+      PlayerStats(vitality, attack, defense, agility),
+      Effect(unlockDoor, modifyStats, heal),
+      Room(roomName),
+      Direction(..) )
 import Data.Maybe (fromMaybe)
 import Data.List(find)
 import Data.Char(toLower)

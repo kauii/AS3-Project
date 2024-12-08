@@ -1,7 +1,7 @@
-module Printer (printDescription) where
+module Utils.Printer (printDescription) where
 
 import qualified Data.Map as Map
-import Utils
+import Utils.FlagsUtils
 import Control.Monad (when)
 
 -- Print a description if its flag condition is met

@@ -1,7 +1,7 @@
 module Inventory (openInventory) where
 
 import Types
-import Utils
+import Utils.Utils
 import Control.Monad.State
 import Control.Monad(when)
 import Data.List (find)

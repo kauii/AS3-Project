@@ -4,7 +4,7 @@ import Data.List(find, sortOn)
 import Data.Maybe(fromJust)
 import Inventory
 import Types
-import Utils
+import Utils.Utils
 import Control.Monad.State
 import System.Random (randomRIO)
 

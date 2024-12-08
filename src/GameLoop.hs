@@ -4,7 +4,7 @@ import Types
 import Control.Monad
 import Inventory (openInventory)
 import Fight (enterCombat)
-import Utils
+import Utils.Utils
 import Control.Monad.State
 import Data.List (find, intercalate)
 import Data.Char (toLower)

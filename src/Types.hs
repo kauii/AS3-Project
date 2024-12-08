@@ -128,7 +128,6 @@ data Action = Go Direction         -- Move in a specific direction
             | Flee                 -- Attempt to flee combat
             deriving (Show, Eq)
 
-
 -- Helper Show Functions (Maybe remove?)
 instance Show RoomObject where
     show (RoomObject name descs items actions) =

@@ -25,17 +25,23 @@ source-repository head
 
 library
   exposed-modules:
-      Boss
+      Assets.InitialState
+      Assets.ProgressRelevant.Boss
+      Assets.ProgressRelevant.Doors
+      Assets.ProgressRelevant.Items
+      Assets.ProgressRelevant.NPCs
+      Assets.ProgressRelevant.RoomObjects
+      Assets.RandomEntities.RandomizedEnemies
+      Assets.RandomEntities.RandomizedItems
+      Assets.Rooms
       Fight
-      FlagsUtils
       GameLoop
-      InitialState
       Inventory
-      Lib
-      Printer
       RoomObjectInteraction
       Types
-      Utils
+      Utils.FlagsUtils
+      Utils.Printer
+      Utils.Utils
   other-modules:
       Paths_AS3_Project
   autogen-modules:

@@ -1,7 +1,7 @@
-module Boss (enterBossBattle) where
+module Assets.ProgressRelevant.Boss (enterBossBattle) where
 
 import Types
-import Utils
+import Utils.Utils
 import Inventory
 import Control.Monad.State
 import Control.Monad(when)
