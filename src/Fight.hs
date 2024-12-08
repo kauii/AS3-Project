@@ -185,7 +185,7 @@ collectLoot enemies = do
     dropWithChance :: Enemy -> IO [Item]
     dropWithChance enemy = do
         chance <- randomRIO (1 :: Int, 100 :: Int)  -- Generate a number between 1 and 100
-        if chance <= 25
+        if chance <= 75
             then return (loot enemy)  -- Drop the loot if the chance is 50% or less
             else return []            -- No loot dropped if chance is greater than 50%
 

@@ -162,7 +162,7 @@ instance Show NPC where
 data ItemType = Consumable | Sword | Armor | KeyItem
     deriving (Show, Eq)
 
-data Difficulty = Easy | Normal | Hard
+data Difficulty = Easy | Normal | Hard | Boss
     deriving (Show, Eq)
 
 type SwitchState = [String]

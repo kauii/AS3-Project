@@ -18,7 +18,7 @@ entranceHall =  Room {
     description = [("A dimly lit stone corridor with a sense of foreboding. Dusty air and faint whispers. To the north there is a door.", "default_true", True)],
     exits = [(North, "Great Hall")],
     roomObjects = [sign],
-    items = [],
+    items = [woodenSword, leatherArmor],
     enemies = [],
     doors = [],
     npcs = [],
@@ -75,7 +75,7 @@ kitchen =  Room {
     enemies = [],
     doors = [secretDoor],
     npcs = [],
-    difficulty = Easy
+    difficulty = Normal
 }
 
 secretPassage :: Room
@@ -97,7 +97,7 @@ armory =  Room {
     description = [("Rusted weapon racks and a locked cabinet. A faint spectral glow lingers. There is a door to the east and a staircase leading downwards. A blacksmith ghost is wandering through the room.", "default_true", True)],
     exits = [(East, "Great Hall"), (Down, "Forge")],
     roomObjects = [cabinet],
-    items = [],
+    items = [ironSword, chainMail],
     enemies = [],
     doors = [],
     npcs = [blacksmith],
@@ -110,7 +110,7 @@ forge =  Room {
     description = [("A blazing forge and glowing runes on an anvil.", "default_true", True)],
     exits = [(Up, "Armory")],
     roomObjects = [anvil],
-    items = [],
+    items = [steelSword, plateArmour],
     enemies = [],
     doors = [],
     npcs = [],
@@ -157,4 +157,19 @@ crypt = Room
     , doors = [ancientSeal]
     , npcs = []
     , difficulty = Hard
+    }
+
+ancientValley :: Room
+ancientValley = Room
+    { roomName = "Ancient Valley"
+    , description = [ ("A desolate valley shrouded in mist. The ground trembles with each step, and a chilling presence looms ahead.",
+           "default_true", True)
+        ]
+    , exits = [(Up, "Crypt")]
+    , roomObjects = []
+    , items = []
+    , enemies = []
+    , doors = []
+    , npcs = []
+    , difficulty = Boss
     }

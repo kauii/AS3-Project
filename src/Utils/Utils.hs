@@ -8,6 +8,8 @@ import qualified Data.Map as Map
 import Control.Monad.State
 import Assets.ProgressRelevant.Items (ancientKey)
 import System.Console.ANSI
+import Control.Monad (when)
+
 
 
 -- | Parse the user input into an Action
@@ -138,15 +140,29 @@ addDirectionToRoom targetRoomName direction targetRoomNameToAdd rooms =
         if roomName room == targetRoomName
         then room { exits = (direction, targetRoomNameToAdd) : exits room }
         else room) rooms
--- | Utility function to flip a switch and update the switch order.
+
+
+-- | Utility function to flip a switch and check the order
 flipSwitch :: String -> StateT GameState IO ()
 flipSwitch switchType = do
     state <- get
     let switchOrder = getSwitchOrder state
     let newOrder = switchOrder ++ [switchType]
-    updateSwitchOrder newOrder
+    put $ setSwitchOrder state newOrder
 
     liftIO $ putStrLn $ "You flipped the " ++ switchType ++ " switch."
+
+    -- Automatically trigger the passphrase prompt if the correct order is achieved
+    when (length newOrder == 3) $ do 
+        speakPassphrase
+
+
+
+-- | Set the switch order in the game state
+setSwitchOrder :: GameState -> [String] -> GameState
+setSwitchOrder state order =
+    let updatedStringFlags = Map.insert "switch_order" order (stringFlags state)
+    in state { stringFlags = updatedStringFlags }
 
 -- | Function to check and handle the passphrase input.
 speakPassphrase :: StateT GameState IO ()
@@ -156,14 +172,26 @@ speakPassphrase = do
 
     if switchOrder == ["Fire", "Water", "Earth"]
         then do
+            liftIO $ do
+                setSGR [SetColor Foreground Vivid Green] 
+                putStrLn "The switches are aligned correctly."
+                setSGR [Reset] 
             liftIO $ putStrLn "Whisper the passphrase: "
             passphrase <- liftIO getLine
             if map toLower passphrase == "eternal rest"
                 then do
                     addItemToPlayer ancientKey
-                    liftIO $ putStrLn "A hidden compartment opens, revealing an Ancient Key. You take it."
+                    liftIO $ do
+                        setSGR [SetColor Foreground Vivid Magenta]
+                        putStrLn "You open the cabinet and find a silver key in it. You take it."
+                        setSGR [Reset]
                 else liftIO $ putStrLn "The passphrase echoes into silence. Nothing happens."
-        else liftIO $ putStrLn "The switches are not aligned correctly. Nothing happens."
+        else do 
+            liftIO $ do
+                setSGR [SetColor Foreground Vivid Yellow] 
+                putStrLn "The switches are not aligned correctly. Nothing happens."
+                setSGR [Reset] 
+            resetSwitchOrder
 
 -- | Get the current switch order from the game state.
 getSwitchOrder :: GameState -> [String]

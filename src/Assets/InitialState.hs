@@ -13,7 +13,7 @@ import Assets.ProgressRelevant.Items
 initialState :: GameState
 initialState = GameState
     { playerState = initialPlayer
-    , world = [entranceHall, greatHall, library, diningRoom, armory, kitchen, secretPassage, crypt]
+    , world = [entranceHall, greatHall, library, diningRoom, armory, kitchen, secretPassage, crypt, ancientValley]
     , flags = Map.fromList [
         ("default_true", True),
         ("chandelier_fixed", False),
@@ -49,7 +49,7 @@ initialPlayer :: Player
 initialPlayer = Player
     { location = "Entrance Hall"
     , inventory = []
-    , life = 90
+    , life = 100
     , stats = PlayerStats { vitality = 100, attack = 20, defense = 5, agility = 20 }
     , quests = []
     , weapon = Nothing
