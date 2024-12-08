@@ -21,24 +21,21 @@ printRoomDescription = do
     let currentRoom = getPlayerRoom player (world gameState)
     let gameFlags = flags gameState
 
-    let itemNames = map formatItem (items currentRoom)
+    let itemNames = map (colorize Magenta . formatItem) (items currentRoom)
     let itemLine = if null itemNames
                     then colorize White "There are no items in the room."
-                    else colorize Magenta ("The following items are in the room: " ++ intercalate ", " itemNames)
+                    else intercalate ", " itemNames
 
     liftIO $ do
-        -- Display main header for the room
-        displayHeader $ "You are in: " ++ colorize Cyan (roomName currentRoom)
-
-        -- Display small header for the room description
+        printColored Cyan "\nYou are in"
+        displayHeader (roomName currentRoom)
+        putStrLn ""
         displaySmallHeader "Room Description"
         mapM_ (printDescription gameFlags) (description currentRoom)
-
-        -- Display small header for the items in the room
-        displaySmallHeader "Items"
+        putStrLn ""
+        displaySmallHeader "Items in the room"
         putStrLn itemLine
 
--- Display a large header with a border
 displayHeader :: String -> IO ()
 displayHeader caption = do
     let lineLength = length caption + 4
