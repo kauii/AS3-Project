@@ -1,5 +1,21 @@
-# AS3-Project
+# Text-Based Adventure Game in Haskell
+Welcome to the Text-Based Adventure Game – a thrilling command-driven exploration through a medieval world filled with danger, puzzles, and treasures! This game challenges players to explore various rooms, solve puzzles, engage in combat with randomized enemies, and collect useful items to advance through the game.
 
+## Overview
+In this game you can:
+- Explore Rooms: Navigate through predefined rooms, each with its own unique descriptions, difficulties, and potential dangers.
+- Solve Puzzles Interact with objects like switches and chests to solve puzzles and unlock hidden paths or rewards.
+- Combat Enemies: Encounter randomized enemies that match the difficulty of the room. Each enemy may drop loot upon defeat.
+- Collect Items: Find and use randomized consumables, weapons, and armor to aid your journey. Items are generated with different quantities and effects.
+- Interact with NPCs and Objects: Engage in conversations, inspect objects, and manipulate the environment to uncover secrets and progress in the story.
+
+## Key Features:
+- Randomization: Items and enemies are randomized to provide a different experience each playthrough.
+- Combat System: Engage in battles, attack enemies, use items, or try to flee.
+- Interactive Puzzles: Solve puzzles, like flipping switches in the correct order and using passphrases to unlock new areas.
+- Inventory Management: Equip weapons and armor, use consumables, and manage your inventory effectively.
+
+  
 ## Setup
 
 ### Setup Haskell
@@ -62,7 +78,3 @@ You have two options for installing Stack:
      
    This should execute the ```main.hs```.If everything is set up correctly.
    Have Fun!
-
-### IDE
-
-As editor I would recommend using **Visual Studio Code** with the Haskell extension (extensionId: ```haskell.haskell```). You are free to use any other IDE that supports Haskell though.
