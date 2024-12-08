@@ -12,6 +12,7 @@ import RoomObjectInteraction (findObjectByName, inspectObject)
 import Utils.Printer
 import System.Console.ANSI
 import System.Exit
+import Assets.ProgressRelevant.Boss (enterBossBattle)
 
 -- | Run the game loop using StateT to manage the game state
 runGameLoop :: GameState -> IO ()
@@ -87,20 +88,29 @@ movePlayer dir = do
                             let newRoom = findRoom exitRoomName (world gameState)
                             put $ gameState { playerState = player { location = exitRoomName } }
                             liftIO $ printColored Green $ "You move to " ++ exitRoomName
-                            unless (null (enemies newRoom)) $ do
-                                liftIO $ printColored Red "You sense danger as you enter the room..."
-                                enterCombat  -- Call the combat system
+                            case difficulty newRoom of
+                                Boss -> do
+                                    liftIO $ printColored Red "You sense an overwhelming presence... The final battle awaits!"
+                                    enterBossBattle  -- Trigger the boss battle
+                                _ -> unless (null (enemies newRoom)) $ do
+                                    liftIO $ printColored Red "You sense danger as you enter the room..."
+                                    enterCombat  -- Call the regular combat system
                             printRoomDescription
                 Nothing -> do
                     -- Move to the room if no door blocks the path
                     let newRoom = findRoom exitRoomName (world gameState)
                     put $ gameState { playerState = player { location = exitRoomName } }
                     liftIO $ printColored Green $ "You move to " ++ exitRoomName
-                    unless (null (enemies newRoom)) $ do
-                        liftIO $ printColored Red "You sense danger as you enter the room..."
-                        enterCombat  -- Call the combat system
+                    case difficulty newRoom of
+                        Boss -> do
+                            liftIO $ printColored Red "You sense an overwhelming presence... The final battle awaits!"
+                            enterBossBattle  -- Trigger the boss battle
+                        _ -> unless (null (enemies newRoom)) $ do
+                            liftIO $ printColored Red "You sense danger as you enter the room..."
+                            enterCombat  -- Call the regular combat system
                     printRoomDescription
         Nothing -> liftIO $ printColored Yellow "You can't go that way!"
+
 
 
 -- | Take item given item name

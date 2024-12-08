@@ -158,3 +158,18 @@ crypt = Room
     , npcs = []
     , difficulty = Hard
     }
+
+ancientValley :: Room
+ancientValley = Room
+    { roomName = "Ancient Valley"
+    , description = [ ("A desolate valley shrouded in mist. The ground trembles with each step, and a chilling presence looms ahead.",
+           "default_true", True)
+        ]
+    , exits = [(Up, "Crypt")]
+    , roomObjects = []
+    , items = []
+    , enemies = []
+    , doors = []
+    , npcs = []
+    , difficulty = Boss
+    }

@@ -47,9 +47,40 @@ randomizeEnemies existingEnemies roomDifficulty = do
     if null validEnemies
         then return existingEnemies
         else do
-            numEnemies <- randomRIO (1, 2)  -- Randomly add 1 or 2 enemies
-            newEnemies <- replicateM numEnemies (randomChoice validEnemies)
+            -- Decide how many enemies to add based on probabilities
+            numEnemies <- weightedEnemyCount
+
+            -- Randomly select unique enemies, up to numEnemies
+            newEnemies <- selectUniqueEnemies validEnemies numEnemies
             return (existingEnemies ++ newEnemies)
+
+-- | Function to determine the number of enemies to add based on weighted probabilities.
+weightedEnemyCount :: IO Int
+weightedEnemyCount = do
+    roll <- randomRIO (1 :: Int, 100)
+    return $ case roll of
+        _ | roll <= 70 -> 1  -- 70% chance for 1 enemy
+        _ | roll <= 90 -> 2  -- 20% chance for 2 enemies
+        _              -> 3  -- 10% chance for 3 enemies
+
+-- | Randomly select a specified number of unique enemies from the list.
+selectUniqueEnemies :: [Enemy] -> Int -> IO [Enemy]
+selectUniqueEnemies enemies num = do
+    shuffledEnemies <- shuffleList enemies
+    return $ take num shuffledEnemies
+
+-- | Helper function to shuffle a list using the Fisher-Yates shuffle.
+shuffleList :: [a] -> IO [a]
+shuffleList [] = return []
+shuffleList xs = do
+    randomPositions <- mapM (\i -> randomRIO (0, i)) [length xs - 1, length xs - 2 .. 0]
+    return $ foldl swap xs (zip [0..] randomPositions)
+  where
+    swap list (i, j) = let elemI = list !! i
+                           elemJ = list !! j
+                       in replaceAt i elemJ $ replaceAt j elemI list
+
+    replaceAt idx newElem list = take idx list ++ [newElem] ++ drop (idx + 1) list
 
 -- | Helper function to randomly decide based on a percentage chance.
 randomChance :: Int -> IO Bool

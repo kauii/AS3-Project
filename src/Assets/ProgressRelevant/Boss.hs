@@ -12,13 +12,15 @@ import Data.List(sortOn)
 -- | Define the final boss
 finalBoss :: Enemy
 finalBoss = Enemy
-    { enemyName = "Dark Overlord"
+    { enemyId = Nothing
+    , enemyName = "Dark Overlord"
     , enemyHealth = 100
     , enemyMaxHealth = 100
     , enemyAttack = 20
     , enemyDefense = 15
     , enemyAgility = 10
-    , loot = []  -- No loot, this is the final boss
+    , loot = []
+    , enemyDifficulty = Boss
     }
 
 -- | Enter the boss battle
