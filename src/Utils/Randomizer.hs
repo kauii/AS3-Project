@@ -44,15 +44,30 @@ randomizeEnemies :: [Enemy] -> Difficulty -> IO [Enemy]
 randomizeEnemies existingEnemies roomDifficulty = do
     -- Filter enemies matching the room difficulty
     let validEnemies = filter (\e -> enemyDifficulty e == roomDifficulty) randomizedEnemies
+
+    -- If no valid enemies are found, return the existing enemies
     if null validEnemies
         then return existingEnemies
         else do
-            -- Decide how many enemies to add based on probabilities
+            -- Decide how many unique enemies to add based on probabilities
             numEnemies <- weightedEnemyCount
 
-            -- Randomly select unique enemies, up to numEnemies
-            newEnemies <- selectUniqueEnemies validEnemies numEnemies
+            -- Randomly select unique enemies, ensuring no duplicates are added
+            newEnemies <- selectUniqueEnemies validEnemies numEnemies existingEnemies
+
             return (existingEnemies ++ newEnemies)
+
+-- | Randomly select a specified number of unique enemies from the list, avoiding duplicates.
+selectUniqueEnemies :: [Enemy] -> Int -> [Enemy] -> IO [Enemy]
+selectUniqueEnemies availableEnemies num existingEnemies = do
+    -- Remove enemies already in the room from the available pool
+    let filteredEnemies = filter (\e -> not (any (\ex -> enemyName ex == enemyName e) existingEnemies)) availableEnemies
+
+    -- Shuffle the filtered enemies and take the specified number
+    shuffledEnemies <- shuffleList filteredEnemies
+
+    return $ take num shuffledEnemies
+
 
 -- | Function to determine the number of enemies to add based on weighted probabilities.
 weightedEnemyCount :: IO Int
