@@ -82,7 +82,7 @@ processTurns [] player enemies = combatLoop player enemies  -- Recurse back into
 processTurns ((name, _, Nothing) : rest) player enemies = do  -- Player's turn
     setTurnEnded False
     liftIO $ putStrLn $ "\n" ++ name ++ "'s turn (Player)"
-    liftIO $ putStrLn "Actions available: (Attack, OpenInv, Flee)"
+    liftIO $ printAvailableActions ["Attack", "OpenInv", "Flee"]
     action <- liftIO getLine
     let parsedAction = parseActionFight action
     case parsedAction of

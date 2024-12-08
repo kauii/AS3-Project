@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - mtl
 - random
+- ansi-terminal
 
 ghc-options:
 - -Wall
@@ -41,6 +42,7 @@ library:
   - base
   - mtl
   - random
+  - ansi-terminal
   - containers
 
 executables:
@@ -55,6 +57,7 @@ executables:
     - AS3-Project
     - mtl
     - random
+    - ansi-terminal
     - containers
 
 tests:

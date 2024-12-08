@@ -6,6 +6,7 @@ import Data.List(find, partition)
 import Data.Char(toLower)
 import qualified Data.Map as Map
 import Control.Monad.State
+import System.Console.ANSI
 
 
 -- | Parse the user input into an Action
@@ -222,3 +223,25 @@ formatStatsFromEffect (Just eff) = case modifyStats eff of
     Just stats -> formatStats stats
     Nothing    -> ""
 formatStatsFromEffect Nothing = ""
+
+-- | Prints a string with a specified color.
+printColored :: Color -> String -> IO ()
+printColored color text = do
+    setSGR [SetColor Foreground Vivid color]
+    putStrLn text
+    setSGR [Reset]
+
+-- | Returns a string wrapped in color (useful for inline color).
+colorize :: Color -> String -> String
+colorize color text = 
+    setSGRCode [SetColor Foreground Vivid color] ++ text ++ setSGRCode [Reset]
+
+printAvailableActions :: [String] -> IO ()
+printAvailableActions actions = putStrLn $
+    colorize Cyan "Available actions: " ++
+    colorize White "(" ++
+    colorize White (concatMap (\action -> action ++ ", ") (init actions)) ++
+    colorize Red (last actions) ++
+    colorize White ")"
+
+

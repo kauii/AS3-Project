@@ -8,6 +8,7 @@ import Data.List (find, partition)
 import Data.Char (toLower)
 import Data.Maybe (isJust)
 import Control.Applicative ((<|>))
+import System.Console.ANSI
 
 -- | Opens the player's inventory and displays stats, gear, and items.
 openInventory :: Bool -> StateT GameState IO Player
@@ -26,10 +27,10 @@ openInventory inCombat = do
 
     liftIO $ displaySmallHeader "Equipped Gear"
     case weapon player of
-        Just w  -> liftIO $ putStrLn $ "  Weapon: " ++ itemName w ++ " " ++ formatStatsFromEffect (effect w)
+        Just w  -> liftIO $ putStrLn $ "  Weapon: " ++ colorize Yellow (itemName w) ++ " " ++ formatStatsFromEffect (effect w)
         Nothing -> liftIO $ putStrLn "  Weapon: None"
     case armor player of
-        Just a  -> liftIO $ putStrLn $ "  Armor:  " ++ itemName a ++ " " ++ formatStatsFromEffect (effect a)
+        Just a  -> liftIO $ putStrLn $ "  Armor:  " ++ colorize Cyan (itemName a) ++ " " ++ formatStatsFromEffect (effect a)
         Nothing -> liftIO $ putStrLn "  Armor:  None"
     liftIO $ putStrLn ""
     
@@ -37,17 +38,16 @@ openInventory inCombat = do
     let inventoryItems = inventory player
     liftIO $ if null inventoryItems
         then putStrLn "Your inventory is empty."
-        else mapM_ (putStrLn . ("  - " ++) . formatItem) inventoryItems
-
+        else mapM_ (putStrLn . ("  - " ++) . colorize Magenta . itemName) inventoryItems
     inventoryInteraction inCombat player
 
 -- | Handles player interaction within the inventory.
 inventoryInteraction :: Bool -> Player -> StateT GameState IO Player
 inventoryInteraction inCombat player = do
-    let availableActions = if inCombat
-                           then "Available actions: (Use, Equip, Inspect, Back)"
-                           else "Available actions: (Drop, Use, Equip, Inspect, Back)"
-    liftIO $ putStrLn availableActions
+    let actions = if inCombat
+                    then ["Use", "Equip", "Inspect", "Back"]
+                    else ["Drop", "Use", "Equip", "Inspect", "Back"]
+    liftIO $ printAvailableActions actions
     action <- liftIO getLine
     let parsedAction = parseActionInventory action
 
