@@ -13,14 +13,15 @@ module Types (
     GameState(..),
     Action(..),
     ItemType(..),
-    Difficulty(..)
+    Difficulty(..),
+    SwitchState
 ) where
 
 import Control.Monad.State
 import qualified Data.Map as Map
 
 -- Directions for navigation
-data Direction = North | South | East | West deriving (Show, Eq)
+data Direction = North | South | East | West | Up | Down deriving (Show, Eq)
 
 -- Rooms, which can contain items, enemies, NPCs, and doors
 data Room = Room {
@@ -120,7 +121,9 @@ data Door = Door {
 data GameState = GameState {
     playerState :: Player,    -- Current state of the player
     world :: [Room],                -- List of all rooms in the game world
-    flags :: Map.Map String Bool
+    flags :: Map.Map String Bool,
+    stringFlags :: Map.Map String [String]
+
 } deriving (Show)
 
 -- Actions a player can perform
@@ -143,6 +146,7 @@ data Action = Go Direction         -- Move in a specific direction
 instance Show RoomObject where
     show (RoomObject name descs items actions) =
         "RoomObject { " ++
+        "name" ++ show name ++ ", " ++
         "descriptions = " ++ show descs ++ ", " ++
         "roomObjectItems = " ++ show items ++ ", " ++
         "roomActions = <functions> }"
@@ -160,3 +164,5 @@ data ItemType = Consumable | Sword | Armor | KeyItem
 
 data Difficulty = Easy | Normal | Hard
     deriving (Show, Eq)
+
+type SwitchState = [String]

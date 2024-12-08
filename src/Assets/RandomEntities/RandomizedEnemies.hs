@@ -1,6 +1,10 @@
-module Assets.RandomEntities.RandomizedEnemies () where
+module Assets.RandomEntities.RandomizedEnemies (module Assets.RandomEntities.RandomizedEnemies) where
 
 import Types
+import Assets.RandomEntities.RandomizedEnemiesLoot
+
+randomizedEnemies :: [Enemy]
+randomizedEnemies = [goblin, ghoul, rat, bandit, skeleton, orc, darkKnight, troll, draconicWarrior, fallenPaladin, wyvern]
 
 goblin :: Enemy
 goblin = Enemy
@@ -12,7 +16,7 @@ goblin = Enemy
     , enemyDefense = 2
     , enemyAgility = 10
     , enemyDifficulty = Easy
-    , loot = []
+    , loot = [meat, dagger]
     }
 
 -- Sample enemy
@@ -26,7 +30,7 @@ ghoul = Enemy
     , enemyDefense = 10
     , enemyAgility = 21
     , enemyDifficulty = Easy
-    , loot = []
+    , loot = [meat]
     }
 
 rat :: Enemy
@@ -39,7 +43,7 @@ rat = Enemy
     , enemyDefense = 1
     , enemyAgility = 12
     , enemyDifficulty = Easy
-    , loot = []
+    , loot = [meat]
     }
 
 bandit :: Enemy
@@ -52,20 +56,20 @@ bandit = Enemy
     , enemyDefense = 3
     , enemyAgility = 9
     , enemyDifficulty = Easy
-    , loot = []
+    , loot = [cape, dagger]
     }
 
-skeletalMinion :: Enemy
-skeletalMinion = Enemy
+skeleton :: Enemy
+skeleton = Enemy
     { enemyId = Nothing
-    , enemyName = "Skeletal Minion"
+    , enemyName = "Skeleton"
     , enemyHealth = 20
     , enemyMaxHealth = 20
     , enemyAttack = 7
     , enemyDefense = 5
     , enemyAgility = 8
     , enemyDifficulty = Easy
-    , loot = []
+    , loot = [skeletonArmor]
     }
 
 orc :: Enemy
@@ -78,7 +82,7 @@ orc = Enemy
     , enemyDefense = 7
     , enemyAgility = 8
     , enemyDifficulty = Normal
-    , loot = []
+    , loot = [meat]
     }
 
 darkKnight :: Enemy
@@ -91,7 +95,7 @@ darkKnight = Enemy
     , enemyDefense = 12
     , enemyAgility = 10
     , enemyDifficulty = Normal
-    , loot = []
+    , loot = [darkKnightArmor, darkKnightAxe]
     }
 
 troll :: Enemy
@@ -104,7 +108,7 @@ troll = Enemy
     , enemyDefense = 10
     , enemyAgility = 6
     , enemyDifficulty = Normal
-    , loot = []
+    , loot = [meat]
     }
 
 draconicWarrior :: Enemy
@@ -117,7 +121,7 @@ draconicWarrior = Enemy
     , enemyDefense = 20
     , enemyAgility = 12
     , enemyDifficulty = Hard
-    , loot = []
+    , loot = [draconicArmor]
     }
 
 fallenPaladin :: Enemy
@@ -130,18 +134,18 @@ fallenPaladin = Enemy
     , enemyDefense = 25
     , enemyAgility = 14
     , enemyDifficulty = Hard
-    , loot = []
+    , loot = [holySword, cape]
     }
 
-wraithLord :: Enemy
-wraithLord = Enemy
+wyvern :: Enemy
+wyvern = Enemy
     { enemyId = Nothing
-    , enemyName = "Wraith Lord"
-    , enemyHealth = 110
-    , enemyMaxHealth = 110
-    , enemyAttack = 32
-    , enemyDefense = 18
-    , enemyAgility = 20
+    , enemyName = "Wyvern"
+    , enemyHealth = 120
+    , enemyMaxHealth = 120
+    , enemyAttack = 28
+    , enemyDefense = 15
+    , enemyAgility = 25
     , enemyDifficulty = Hard
-    , loot = []
+    , loot = [wyvernFeather, meat]
     }

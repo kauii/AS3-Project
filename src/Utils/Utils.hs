@@ -6,6 +6,8 @@ import Data.List(find, partition)
 import Data.Char(toLower)
 import qualified Data.Map as Map
 import Control.Monad.State
+import Assets.ProgressRelevant.Items (ancientKey)
+import System.Console.ANSI
 
 
 -- | Parse the user input into an Action
@@ -30,6 +32,8 @@ parseDirection dir = case map toLower dir of  -- Normalize direction to lowercas
     "south" -> Just South
     "east"  -> Just East
     "west"  -> Just West
+    "up"    -> Just Up
+    "down"  -> Just Down
     _       -> Nothing
 
 
@@ -76,53 +80,6 @@ setGameFlag flagName flagValue = do
     let updatedFlags = Map.insert flagName flagValue (flags state)
     put state { flags = updatedFlags }
 
-
--- Convert healing effect to a readable string
-describeHealing :: Maybe Int -> String
-describeHealing Nothing = "No healing effect."
-describeHealing (Just amount) = "Heals " ++ show amount ++ " HP."
-
--- Convert door unlocking effect to a readable string
-describeUnlock :: Maybe String -> String
-describeUnlock Nothing = "No unlocking effect."
-describeUnlock (Just door) = "Unlocks the door: " ++ door
-
--- Convert Effect to a readable string
-describeEffect :: Maybe Effect -> String
-describeEffect Nothing = "No effects."
-describeEffect (Just effect) =
-    let stats = case modifyStats effect of
-                  Nothing -> []
-                  Just stats -> ["Stat Changes: Max Life: " ++ show (vitality stats) ++ ", Attack: " ++ show (attack stats) ++ ", Defense: " ++ show (defense stats) ++ ", Agility: " ++ show (agility stats)]
-        healing = case heal effect of
-                    Nothing -> []
-                    Just amount -> ["Healing: Restores " ++ show amount ++ " HP"]
-        unlocking = case unlockDoor effect of
-                      Nothing -> []
-                      Just door -> ["Unlocks: " ++ door]
-        effectDescriptions = stats ++ healing ++ unlocking
-    in if null effectDescriptions
-       then "No effects."
-       else unlines effectDescriptions
-
-pressEnterToContinue :: IO ()
-pressEnterToContinue = do
-    putStrLn "\nPress Enter to continue..."
-    _ <- getLine
-    return ()
-
-displayHeader :: String -> IO ()
-displayHeader caption = do
-    let lineLength = length caption + 4
-        border = replicate lineLength '═'
-    putStrLn $ "╔" ++ border ++ "╗"
-    putStrLn $ "║  " ++ caption ++ "  ║"
-    putStrLn $ "╚" ++ border ++ "╝"
-
-displaySmallHeader :: String -> IO ()
-displaySmallHeader caption = do
-    putStrLn $ ">>> " ++ caption ++ " <<<"
-
 -- | Set the "turnEnded" flag
 setTurnEnded :: Bool -> StateT GameState IO ()
 setTurnEnded value = do
@@ -135,32 +92,6 @@ isTurnEnded :: StateT GameState IO Bool
 isTurnEnded = do
     state <- get
     return $ Map.findWithDefault False "turnEnded" (flags state)
-
--- | Print health bars for enemies and player
-printCombatHealthBars :: [Enemy] -> Player -> IO ()
-printCombatHealthBars enemies player = do
-    -- Print enemies section
-    displayHeader "ENEMIES"
-    mapM_ printEnemyHealth enemies
-
-    -- Print player section
-    displayHeader "PLAYER"
-    putStrLn $ generateHealthBar (life player) (vitality (stats player)) 20
-
--- | Print a single enemy's health with a newline after each
-printEnemyHealth :: Enemy -> IO ()
-printEnemyHealth enemy = do
-    putStrLn $ "- " ++ enemyName enemy
-    putStrLn $ generateHealthBar (enemyHealth enemy) (enemyMaxHealth enemy) 20
-    putStrLn ""  -- Add a blank line after each enemy
-
--- | Generate a single health bar
-generateHealthBar :: Int -> Int -> Int -> String
-generateHealthBar currentHealth maxHealth barLength =
-    let filledLength = (currentHealth * barLength) `div` maxHealth
-        emptyLength = barLength - filledLength
-    in replicate filledLength '█' ++ replicate emptyLength '░' ++ 
-       " (" ++ show currentHealth ++ "/" ++ show maxHealth ++ ")"
        
 formatItem :: Item -> String
 formatItem item
@@ -200,3 +131,72 @@ checkIfInInventory itemNameToCheck qtyToCheck = do
     state <- get
     let player = playerState state
     return $ any (\i -> itemName i == itemNameToCheck && quantity i >= qtyToCheck) (inventory player)
+
+addDirectionToRoom :: String -> Direction -> String -> [Room] -> [Room]
+addDirectionToRoom targetRoomName direction targetRoomNameToAdd rooms =
+    map (\room ->
+        if roomName room == targetRoomName
+        then room { exits = (direction, targetRoomNameToAdd) : exits room }
+        else room) rooms
+-- | Utility function to flip a switch and update the switch order.
+flipSwitch :: String -> StateT GameState IO ()
+flipSwitch switchType = do
+    state <- get
+    let switchOrder = getSwitchOrder state
+    let newOrder = switchOrder ++ [switchType]
+    updateSwitchOrder newOrder
+
+    liftIO $ putStrLn $ "You flipped the " ++ switchType ++ " switch."
+
+-- | Function to check and handle the passphrase input.
+speakPassphrase :: StateT GameState IO ()
+speakPassphrase = do
+    state <- get
+    let switchOrder = getSwitchOrder state
+
+    if switchOrder == ["Fire", "Water", "Earth"]
+        then do
+            liftIO $ putStrLn "Whisper the passphrase: "
+            passphrase <- liftIO getLine
+            if map toLower passphrase == "eternal rest"
+                then do
+                    addItemToPlayer ancientKey
+                    liftIO $ putStrLn "A hidden compartment opens, revealing an Ancient Key. You take it."
+                else liftIO $ putStrLn "The passphrase echoes into silence. Nothing happens."
+        else liftIO $ putStrLn "The switches are not aligned correctly. Nothing happens."
+
+-- | Get the current switch order from the game state.
+getSwitchOrder :: GameState -> [String]
+getSwitchOrder state = fromMaybe [] (Map.lookup "switch_order" (stringFlags state))
+
+-- | Update the switch order in the game state.
+updateSwitchOrder :: [String] -> StateT GameState IO ()
+updateSwitchOrder order = do
+    state <- get
+    let updatedStringFlags = Map.insert "switch_order" order (stringFlags state)
+    put state { stringFlags = updatedStringFlags }
+
+-- | Reset the switch order to an empty list.
+resetSwitchOrder :: StateT GameState IO ()
+resetSwitchOrder = updateSwitchOrder []
+-- | Formats PlayerStats for display, showing only non-zero values with abbreviations.
+formatStats :: PlayerStats -> String
+formatStats stats =
+    let statList = filter (\(_, val) -> val /= 0) [
+            ("HP", vitality stats),
+            ("ATK", attack stats),
+            ("DEF", defense stats),
+            ("SPD", agility stats)  -- Using "SPD" for speed instead of "AGI"
+            ]
+    in if null statList
+       then ""
+       else "(" ++ unwords (map formatStat statList) ++ ")"
+  where
+    formatStat (abbr, val) = abbr ++ ": " ++ (if val > 0 then "+" else "") ++ show val
+
+-- | Formats the stats from an item's effect if they exist.
+formatStatsFromEffect :: Maybe Effect -> String
+formatStatsFromEffect (Just eff) = case modifyStats eff of
+    Just stats -> formatStats stats
+    Nothing    -> ""
+formatStatsFromEffect Nothing = ""

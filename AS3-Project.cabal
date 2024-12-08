@@ -32,6 +32,7 @@ library
       Assets.ProgressRelevant.NPCs
       Assets.ProgressRelevant.RoomObjects
       Assets.RandomEntities.RandomizedEnemies
+      Assets.RandomEntities.RandomizedEnemiesLoot
       Assets.RandomEntities.RandomizedItems
       Assets.Rooms
       Fight
@@ -41,6 +42,7 @@ library
       Types
       Utils.FlagsUtils
       Utils.Printer
+      Utils.Randomizer
       Utils.Utils
   other-modules:
       Paths_AS3_Project
@@ -50,7 +52,8 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base
+      ansi-terminal
+    , base
     , containers
     , mtl
     , random
@@ -67,6 +70,7 @@ executable AS3-Project-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       AS3-Project
+    , ansi-terminal
     , base >=4.7 && <5
     , containers
     , mtl
@@ -85,6 +89,7 @@ test-suite AS3-Project-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       AS3-Project
+    , ansi-terminal
     , base >=4.7 && <5
     , mtl
     , random
