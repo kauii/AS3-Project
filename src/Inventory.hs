@@ -155,31 +155,46 @@ equipItem itemNameInput = do
         Just item -> case itemType item of
             Sword -> do
                 let equippedWeapon = weapon player
-                let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory player)
-                let updatedInventoryWithOldWeapon = case equippedWeapon of
-                        Just oldWeapon -> oldWeapon : updatedInventory  -- Add the currently equipped weapon back to the inventory
-                        Nothing -> updatedInventory  -- No weapon equipped, keep inventory as is
+                -- Remove effects of the currently equipped weapon, if any
+                let playerWithoutOldEffect = case equippedWeapon of
+                        Just oldWeapon -> removeEffect (effect oldWeapon) player
+                        Nothing -> player
 
-                let playerWithEffect = applyEffect (effect item) player
-                let updatedPlayer = playerWithEffect { weapon = Just item, inventory = updatedInventoryWithOldWeapon }
+                let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory playerWithoutOldEffect)
+                let updatedInventoryWithOldWeapon = case equippedWeapon of
+                        Just oldWeapon -> oldWeapon : updatedInventory
+                        Nothing -> updatedInventory
+
+                -- Apply effects of the new weapon
+                let playerWithNewEffect = applyEffect (effect item) playerWithoutOldEffect
+                let updatedPlayer = playerWithNewEffect { weapon = Just item, inventory = updatedInventoryWithOldWeapon }
+
                 put state { playerState = updatedPlayer }
                 liftIO $ printColored Green $ "You equipped the weapon: " ++ itemName item ++ "."
 
             Armor -> do
                 let equippedArmor = armor player
-                let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory player)
-                let updatedInventoryWithOldArmor = case equippedArmor of
-                        Just oldArmor -> oldArmor : updatedInventory  -- Add the currently equipped armor back to the inventory
-                        Nothing -> updatedInventory  -- No armor equipped, keep inventory as is
+                -- Remove effects of the currently equipped armor, if any
+                let playerWithoutOldEffect = case equippedArmor of
+                        Just oldArmor -> removeEffect (effect oldArmor) player
+                        Nothing -> player
 
-                let playerWithEffect = applyEffect (effect item) player
-                let updatedPlayer = playerWithEffect { armor = Just item, inventory = updatedInventoryWithOldArmor }
+                let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory playerWithoutOldEffect)
+                let updatedInventoryWithOldArmor = case equippedArmor of
+                        Just oldArmor -> oldArmor : updatedInventory
+                        Nothing -> updatedInventory
+
+                -- Apply effects of the new armor
+                let playerWithNewEffect = applyEffect (effect item) playerWithoutOldEffect
+                let updatedPlayer = playerWithNewEffect { armor = Just item, inventory = updatedInventoryWithOldArmor }
+
                 put state { playerState = updatedPlayer }
                 liftIO $ printColored Green $ "You equipped the armor: " ++ itemName item ++ "."
 
             _ -> liftIO $ printColored Red "This item cannot be equipped."
 
         Nothing -> liftIO $ printColored Yellow "Item not found."
+
 
 inspect :: String -> StateT GameState IO ()
 inspect itemNameInput = do
@@ -221,3 +236,19 @@ applyEffect (Just effect) player =
             Just healingAmount -> min (life player + healingAmount) (vitality updatedStats)
 
     in player { stats = updatedStats, life = updatedLife }
+
+removeEffect :: Maybe Effect -> Player -> Player
+removeEffect Nothing player = player
+removeEffect (Just effect) player =
+    let -- Subtract stat changes
+        updatedStats = case modifyStats effect of
+            Nothing -> stats player
+            Just statChanges -> PlayerStats
+                { vitality = max 1 (vitality (stats player) - vitality statChanges)
+                , attack   = max 1 (attack (stats player) - attack statChanges)
+                , defense  = max 1 (defense (stats player) - defense statChanges)
+                , agility  = max 1 (agility (stats player) - agility statChanges)
+                }
+
+        -- Subtract healing effects (not applicable in this context, so just keep life as is)
+    in player { stats = updatedStats }
