@@ -54,7 +54,7 @@ library =  Room {
 diningRoom :: Room
 diningRoom =  Room {
     roomName = "Dining Room",
-    description = [("A long table with rotting food and broken candlesticks. There is a door to the west and a staircase leading downwards.", "default_true", True)],
+    description = [("A long table with rotting food and broken candlesticks. On the right, a weird portrait is to see. There is a door to the west and a staircase leading downwards.", "default_true", True)],
     exits = [(West, "Great Hall"), (Down, "Kitchen")],
     roomObjects = [portrait],
     items = [candle],

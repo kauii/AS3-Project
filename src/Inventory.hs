@@ -145,7 +145,6 @@ dropItem itemNameInput = do
             liftIO $ putStrLn $ "You dropped " ++ itemName item ++ "."
         Nothing -> liftIO $ printColored Yellow "Item not found."
 
--- | Equips an item (either a weapon or armor) from the inventory and applies its effects.
 equipItem :: String -> StateT GameState IO ()
 equipItem itemNameInput = do
     state <- get
@@ -155,18 +154,31 @@ equipItem itemNameInput = do
     case maybeItem of
         Just item -> case itemType item of
             Sword -> do
+                let equippedWeapon = weapon player
                 let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory player)
+                let updatedInventoryWithOldWeapon = case equippedWeapon of
+                        Just oldWeapon -> oldWeapon : updatedInventory  -- Add the currently equipped weapon back to the inventory
+                        Nothing -> updatedInventory  -- No weapon equipped, keep inventory as is
+
                 let playerWithEffect = applyEffect (effect item) player
-                let updatedPlayer = playerWithEffect { weapon = Just item, inventory = updatedInventory }
+                let updatedPlayer = playerWithEffect { weapon = Just item, inventory = updatedInventoryWithOldWeapon }
                 put state { playerState = updatedPlayer }
                 liftIO $ printColored Green $ "You equipped the weapon: " ++ itemName item ++ "."
+
             Armor -> do
+                let equippedArmor = armor player
                 let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory player)
+                let updatedInventoryWithOldArmor = case equippedArmor of
+                        Just oldArmor -> oldArmor : updatedInventory  -- Add the currently equipped armor back to the inventory
+                        Nothing -> updatedInventory  -- No armor equipped, keep inventory as is
+
                 let playerWithEffect = applyEffect (effect item) player
-                let updatedPlayer = playerWithEffect { armor = Just item, inventory = updatedInventory }
+                let updatedPlayer = playerWithEffect { armor = Just item, inventory = updatedInventoryWithOldArmor }
                 put state { playerState = updatedPlayer }
                 liftIO $ printColored Green $ "You equipped the armor: " ++ itemName item ++ "."
+
             _ -> liftIO $ printColored Red "This item cannot be equipped."
+
         Nothing -> liftIO $ printColored Yellow "Item not found."
 
 inspect :: String -> StateT GameState IO ()
