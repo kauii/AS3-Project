@@ -108,3 +108,21 @@ goldCoin = Item
     , itemType = KeyItem
     , itemAscii = ""
     }
+
+ancientKey :: Item
+ancientKey = Item
+    { itemName = "Ancient Key"
+    , itemDescription = "An ancient key, forged to open the seal to the long forgotten Valley."
+    , effect = Nothing
+    , quantity = 1
+    , itemType = KeyItem
+    , itemAscii = unlines
+        [ "       ____"
+        , "      |    |"
+        , "      |____|"
+        , "        ||"
+        , "        ||"
+        , "        ||"
+        , "       /__\\"
+        ]
+    }

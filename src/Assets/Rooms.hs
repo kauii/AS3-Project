@@ -129,3 +129,17 @@ hallway = Room
     , npcs = []
     , difficulty = Easy
     }
+
+crypt :: Room
+crypt = Room
+    { roomName = "Crypt"
+    , description = [ ("The air is damp and echoing, carrying the whispers of ancient secrets." 
+    ++"\nThree ancient switches are set into the wall, their purpose shrouded in mystery.", "default_true", True)]
+    , exits = [(South, "Secret Passage"), (Down, "Ancient Valley")]
+    , roomObjects = []
+    , items = []
+    , enemies = []
+    , doors = [ancientSeal]
+    , npcs = []
+    , difficulty = Hard
+    }

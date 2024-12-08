@@ -27,3 +27,10 @@ woodenDoor = Door
     , keyRequired = Just "Rusty Key"
     }
 
+ancientSeal :: Door
+ancientSeal = Door
+    { doorName = "Ancient Seal"
+    , leadsTo = "Treasure Vault"
+    , isLocked = True
+    , keyRequired = Just "Ancient Key"
+    }

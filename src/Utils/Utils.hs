@@ -6,6 +6,7 @@ import Data.List(find, partition)
 import Data.Char(toLower)
 import qualified Data.Map as Map
 import Control.Monad.State
+import Assets.ProgressRelevant.Items (ancientKey)
 
 
 -- | Parse the user input into an Action
@@ -202,3 +203,45 @@ checkIfInInventory itemNameToCheck qtyToCheck = do
     state <- get
     let player = playerState state
     return $ any (\i -> itemName i == itemNameToCheck && quantity i >= qtyToCheck) (inventory player)
+
+-- | Utility function to flip a switch and update the switch order.
+flipSwitch :: String -> StateT GameState IO ()
+flipSwitch switchType = do
+    state <- get
+    let switchOrder = getSwitchOrder state
+    let newOrder = switchOrder ++ [switchType]
+    updateSwitchOrder newOrder
+
+    liftIO $ putStrLn $ "You flipped the " ++ switchType ++ " switch."
+
+-- | Function to check and handle the passphrase input.
+speakPassphrase :: StateT GameState IO ()
+speakPassphrase = do
+    state <- get
+    let switchOrder = getSwitchOrder state
+
+    if switchOrder == ["Fire", "Water", "Earth"]
+        then do
+            liftIO $ putStrLn "Whisper the passphrase: "
+            passphrase <- liftIO getLine
+            if map toLower passphrase == "eternal rest"
+                then do
+                    addItemToPlayer ancientKey
+                    liftIO $ putStrLn "A hidden compartment opens, revealing an Ancient Key. You take it."
+                else liftIO $ putStrLn "The passphrase echoes into silence. Nothing happens."
+        else liftIO $ putStrLn "The switches are not aligned correctly. Nothing happens."
+
+-- | Get the current switch order from the game state.
+getSwitchOrder :: GameState -> [String]
+getSwitchOrder state = fromMaybe [] (Map.lookup "switch_order" (stringFlags state))
+
+-- | Update the switch order in the game state.
+updateSwitchOrder :: [String] -> StateT GameState IO ()
+updateSwitchOrder order = do
+    state <- get
+    let updatedStringFlags = Map.insert "switch_order" order (stringFlags state)
+    put state { stringFlags = updatedStringFlags }
+
+-- | Reset the switch order to an empty list.
+resetSwitchOrder :: StateT GameState IO ()
+resetSwitchOrder = updateSwitchOrder []

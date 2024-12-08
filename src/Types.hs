@@ -13,7 +13,8 @@ module Types (
     GameState(..),
     Action(..),
     ItemType(..),
-    Difficulty(..)
+    Difficulty(..),
+    SwitchState
 ) where
 
 import Control.Monad.State
@@ -120,7 +121,9 @@ data Door = Door {
 data GameState = GameState {
     playerState :: Player,    -- Current state of the player
     world :: [Room],                -- List of all rooms in the game world
-    flags :: Map.Map String Bool
+    flags :: Map.Map String Bool,
+    stringFlags :: Map.Map String [String]
+
 } deriving (Show)
 
 -- Actions a player can perform
@@ -160,3 +163,5 @@ data ItemType = Consumable | Sword | Armor | KeyItem
 
 data Difficulty = Easy | Normal | Hard
     deriving (Show, Eq)
+
+type SwitchState = [String]

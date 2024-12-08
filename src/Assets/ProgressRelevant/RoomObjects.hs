@@ -114,3 +114,18 @@ cabinet = RoomObject {
                     liftIO $ putStrLn "The cabinet is already open.")
     ]
 }
+
+switches :: RoomObject
+switches = RoomObject
+    { objectName = "Switches"
+    , descriptions =
+        [ ("Three ancient switches are embedded in the wall. The symbols for Fire, Water, and Earth are carved above them.", "default_true", True)
+        ]
+    , roomObjectItems = []
+    , roomActions =
+        [ ("flip fire", \_ -> flipSwitch "Fire")
+        , ("flip water", \_ -> flipSwitch "Water")
+        , ("flip earth", \_ -> flipSwitch "Earth")
+        , ("speak passphrase", const speakPassphrase)
+        ]
+    }
