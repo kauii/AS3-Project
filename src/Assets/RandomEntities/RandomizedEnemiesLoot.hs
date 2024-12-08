@@ -40,7 +40,7 @@ dagger = Item
     , effect = Just $ Effect
         { modifyStats = Just $ PlayerStats
             { vitality = 0
-            , attack = 5    -- Increases attack by 5
+            , attack = 15    -- Increases attack by 5
             , defense = 0
             , agility = 3   -- Increases agility by 3
             }
@@ -63,7 +63,7 @@ skeletonArmor :: Item
 skeletonArmor = Item
     { itemName = "Skeleton Armor"
     , itemDescription = "Armor made from bones. Increases defense but reduces agility."
-    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 0, defense = 10, agility = -5 }, heal = Nothing, unlockDoor = Nothing }
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 0, defense = 18, agility = -5 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
     , itemType = Armor
     , itemAscii = unlines
@@ -86,7 +86,7 @@ darkKnightAxe = Item
     , effect = Just $ Effect
         { modifyStats = Just PlayerStats
             { vitality = 0
-            , attack = 15
+            , attack = 30
             , defense = 0
             , agility = -2
             }
@@ -110,7 +110,7 @@ darkKnightArmor :: Item
 darkKnightArmor = Item
     { itemName = "Dark Knight Armor"
     , itemDescription = "Heavy armor that offers high defense but drains your health."
-    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = -5, attack = 0, defense = 20, agility = -10 }, heal = Nothing, unlockDoor = Nothing }
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = -5, attack = 0, defense = 35, agility = -10 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
     , itemType = Armor
     , itemAscii = unlines
@@ -131,7 +131,7 @@ draconicArmor :: Item
 draconicArmor = Item
     { itemName = "Draconic Armor"
     , itemDescription = "Mystical armor that boosts all stats slightly."
-    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 5, attack = 0, defense = 15, agility = 5 }, heal = Nothing, unlockDoor = Nothing }
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 5, attack = 0, defense = 38, agility = 5 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
     , itemType = Armor
     , itemAscii = unlines
@@ -153,7 +153,7 @@ holySword :: Item
 holySword = Item
     { itemName = "Holy Sword"
     , itemDescription = "A blessed sword that increases your attack power."
-    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 4, attack = 25, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 4, attack = 40, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
     , itemType = Sword
     , itemAscii = unlines

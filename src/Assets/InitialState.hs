@@ -47,9 +47,9 @@ object1 = RoomObject {
 -- Initial player state
 initialPlayer :: Player
 initialPlayer = Player
-    { location = "Crypt"
+    { location = "Entrance Hall"
     , inventory = []
-    , life = 90
+    , life = 100
     , stats = PlayerStats { vitality = 100, attack = 20, defense = 5, agility = 20 }
     , quests = []
     , weapon = Nothing

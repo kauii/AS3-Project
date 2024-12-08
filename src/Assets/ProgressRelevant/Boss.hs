@@ -7,6 +7,7 @@ import Inventory
 import Control.Monad.State
 import Control.Monad(when)
 import Data.List(sortOn)
+import System.Exit
 
 
 -- | Define the final boss
@@ -14,10 +15,10 @@ finalBoss :: Enemy
 finalBoss = Enemy
     { enemyId = Nothing
     , enemyName = "Dark Overlord"
-    , enemyHealth = 100
-    , enemyMaxHealth = 100
-    , enemyAttack = 20
-    , enemyDefense = 15
+    , enemyHealth = 160
+    , enemyMaxHealth = 160
+    , enemyAttack = 50
+    , enemyDefense = 30
     , enemyAgility = 10
     , loot = []
     , enemyDifficulty = Boss
@@ -114,3 +115,4 @@ displayEnding = liftIO $ do
     displayHeader "CONGRATULATIONS!"
     putStrLn "You have vanquished the Dark Overlord and saved the kingdom!"
     putStrLn "Thank you for playing!"
+    exitSuccess

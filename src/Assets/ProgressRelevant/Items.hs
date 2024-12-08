@@ -83,7 +83,7 @@ woodenSword :: Item
 woodenSword = Item
     { itemName = "Wooden Sword"
     , itemDescription = "A stump blade, useful for combat."
-    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 5, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 10, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
     , itemType = Sword
     , itemAscii = ""
@@ -93,7 +93,7 @@ ironSword :: Item
 ironSword = Item {
     itemName = "Iron Sword"
     , itemDescription = "A sharp blade, perfect for combat."
-    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 10, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 20, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
     , itemType = Sword
     , itemAscii = ""
@@ -103,7 +103,7 @@ steelSword :: Item
 steelSword = Item {
     itemName = "Steel Sword"
     , itemDescription = "A very fine blade, excellent for combat."
-    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 15, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 30, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
     , itemType = Sword
     , itemAscii = ""
@@ -123,7 +123,7 @@ chainMail :: Item
 chainMail = Item {
     itemName = "Chainmail"
     , itemDescription = "Provides good protection."
-    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 0, defense = 10, agility = -5 }, heal = Nothing, unlockDoor = Nothing }
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 0, defense = 15, agility = -5 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
     , itemType = Armor
     , itemAscii = ""
@@ -133,7 +133,7 @@ plateArmour :: Item
 plateArmour = Item {
     itemName = "Chainmail"
     , itemDescription = "Provides excellent protection."
-    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 0, defense = 15, agility = -10 }, heal = Nothing, unlockDoor = Nothing }
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 0, defense = 20, agility = -10 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
     , itemType = Armor
     , itemAscii = ""

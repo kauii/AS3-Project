@@ -75,7 +75,7 @@ kitchen =  Room {
     enemies = [],
     doors = [secretDoor],
     npcs = [],
-    difficulty = Easy
+    difficulty = Normal
 }
 
 secretPassage :: Room

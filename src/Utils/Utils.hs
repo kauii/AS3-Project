@@ -153,11 +153,7 @@ flipSwitch switchType = do
     liftIO $ putStrLn $ "You flipped the " ++ switchType ++ " switch."
 
     -- Automatically trigger the passphrase prompt if the correct order is achieved
-    when (newOrder == ["Fire", "Water", "Earth"]) $ do
-        liftIO $ do
-            setSGR [SetColor Foreground Vivid Green] 
-            putStrLn "The switches are aligned correctly."
-            setSGR [Reset] 
+    when (length newOrder == 3) $ do 
         speakPassphrase
 
 
@@ -176,6 +172,10 @@ speakPassphrase = do
 
     if switchOrder == ["Fire", "Water", "Earth"]
         then do
+            liftIO $ do
+                setSGR [SetColor Foreground Vivid Green] 
+                putStrLn "The switches are aligned correctly."
+                setSGR [Reset] 
             liftIO $ putStrLn "Whisper the passphrase: "
             passphrase <- liftIO getLine
             if map toLower passphrase == "eternal rest"
@@ -186,7 +186,12 @@ speakPassphrase = do
                         putStrLn "You open the cabinet and find a silver key in it. You take it."
                         setSGR [Reset]
                 else liftIO $ putStrLn "The passphrase echoes into silence. Nothing happens."
-        else liftIO $ putStrLn "The switches are not aligned correctly. Nothing happens."
+        else do 
+            liftIO $ do
+                setSGR [SetColor Foreground Vivid Yellow] 
+                putStrLn "The switches are not aligned correctly. Nothing happens."
+                setSGR [Reset] 
+            resetSwitchOrder
 
 -- | Get the current switch order from the game state.
 getSwitchOrder :: GameState -> [String]
