@@ -51,7 +51,8 @@ data NPC = NPC {
 data Item = Item {
     itemName :: String,            -- Name of the item
     itemDescription :: String,     -- Description of the item
-    effect :: Maybe Effect         -- Effect the item has when used (if any)
+    effect :: Maybe Effect,         -- Effect the item has when used (if any)
+    quantity :: Int
 } deriving (Show, Eq)
 
 -- Effects of items, which can modify player stats or state

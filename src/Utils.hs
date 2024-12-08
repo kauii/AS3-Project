@@ -1,4 +1,4 @@
-module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded) where
+module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded, formatItem) where
 
 import Types
 import Data.Maybe (fromMaybe)
@@ -123,3 +123,7 @@ isTurnEnded = do
     state <- get
     return $ Map.findWithDefault False "turnEnded" (flags state)
 
+formatItem :: Item -> String
+formatItem item
+    | quantity item > 1 = show (quantity item) ++ "x " ++ itemName item
+    | otherwise = itemName item

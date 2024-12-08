@@ -6,9 +6,8 @@ import Inventory (openInventory)
 import Fight (enterCombat)
 import Utils
 import Control.Monad.State
-import Data.List (find, intercalate)
+import Data.List (find, partition)
 import Data.Char (toLower)
-import qualified Data.Map as Map
 import RoomObjectInteraction (findObjectByName, inspectObject)
 import Printer
 
@@ -64,17 +63,15 @@ movePlayer dir = do
                                 if any (\item -> itemName item == keyName) (inventory player)
                                 then do
                                     -- Unlock the door and remove the key
-                                    let newInventory = filter (\item -> itemName item /= keyName) (inventory player)
-                                    let updatedPlayer = player { inventory = newInventory }
                                     let updatedDoor = door { isLocked = False }
                                     let updatedDoors = map (\d -> if doorName d == doorName door then updatedDoor else d) (doors currentRoom)
                                     let updatedRoom = currentRoom { doors = updatedDoors }
                                     let updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world gameState)
-                                    put gameState { playerState = updatedPlayer, world = updatedWorld }
+                                    put gameState { world = updatedWorld }
                                     liftIO $ putStrLn $ "You unlocked the door with " ++ keyName ++ "."
                                     movePlayer dir -- Retry moving after unlocking
                                 else
-                                    liftIO $ putStrLn "This path is currently blocked."
+                                    liftIO $ putStrLn $ "This path is currently blocked. You need " ++ keyName ++ " to progress."
                             Nothing -> liftIO $ putStrLn "This path is currently blocked."
                         else do
                             let newRoom = findRoom exitRoomName (world gameState)
@@ -99,7 +96,15 @@ takeItem itemNameInput = do
 
     case maybeItem of
         Just item -> do
-            let updatedInventory = item : inventory player
+             -- Check if the item already exists in the inventory
+            let (existingItems, otherItems) = partition (\i -> itemName i == itemName item) (inventory player)
+            let updatedInventory = case existingItems of
+                    [existingItem] -> 
+                        let combinedItem = existingItem { quantity = quantity existingItem + quantity item }
+                        in combinedItem : otherItems
+                    [] -> item : otherItems
+                    _ -> otherItems
+
             let updatedPlayer = player { inventory = updatedInventory }
             
             let updatedRoomItems = filter (\i -> itemName i /= itemName item) (items currentRoom)
@@ -122,9 +127,18 @@ talkTo npcNameInput = do
                     let player = playerState state
                     let maybeItem = find (\item -> itemName item == cItemName) (inventory player)
                     case maybeItem of
-                        Just _ -> do
-                            -- Remove item and execute interaction
-                            let updatedInventory = filter (\item -> itemName item /= cItemName) (inventory player)
+                        Just item -> do
+                            liftIO $ putStrLn $ "You give " ++ npcName npc ++ " " ++ itemName item
+                            -- Update inventory: decrement quantity or remove item
+                            let updatedInventory = 
+                                    if quantity item > 1
+                                    then map (\i -> if itemName i == cItemName 
+                                                    then i { quantity = quantity i - 1 }
+                                                    else i) 
+                                             (inventory player)
+                                    else filter (\i -> itemName i /= cItemName) (inventory player)
+
+                            -- Update the player state and execute interaction
                             put state { playerState = player { inventory = updatedInventory } }
                             onInteraction npc
                         Nothing -> liftIO $ putStrLn $ dialogUnavailable npc

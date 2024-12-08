@@ -67,6 +67,7 @@ healthPotion = Item
     { itemName = "Health Potion"
     , itemDescription = "A small vial filled with a red liquid. Restores 20 health."
     , effect = Just $ Effect { modifyStats = Nothing, heal = Just 20, unlockDoor = Nothing }
+    , quantity = 2
     }
 
 -- Sample items
@@ -81,6 +82,7 @@ mysteriousPotion = Item
             , agility = 0 }
             , heal = Nothing
             , unlockDoor = Nothing }
+    , quantity = 2
     }
 
 rustyKey :: Item
@@ -88,6 +90,7 @@ rustyKey = Item
     { itemName = "Rusty Key"
     , itemDescription = "An old, rusty key. It might open a door."
     , effect = Just $ Effect { modifyStats = Nothing, heal = Nothing, unlockDoor = Just "Wooden Door" }
+    , quantity = 1
     }
 
 sword :: Item
@@ -95,6 +98,7 @@ sword = Item
     { itemName = "Sword"
     , itemDescription = "A sharp blade, perfect for combat."
     , effect = Nothing
+    , quantity = 1
     }
 
 -- Sample enemy
@@ -126,6 +130,7 @@ goldCoin = Item
     { itemName = "Gold Coin"
     , itemDescription = "A shiny coin. Valuable for trade."
     , effect = Nothing
+    , quantity = 2
     }
 
 -- Sample door
@@ -147,7 +152,7 @@ questGiver = NPC {
         liftIO $ putStrLn "Thank you for the Gold Coin! I grant you a Potion."
         state <- get
         let player = playerState state
-        let rewardItem = Item "Potion" "Restores health" Nothing
+        let rewardItem = Item "Potion" "Restores health" Nothing 1
         let updatedInventory = rewardItem : inventory player
         put state { playerState = player { inventory = updatedInventory } },
     dialogUnavailable = "I could really use a Gold Coin right now. Can you find one?"
@@ -167,7 +172,7 @@ villager = NPC {
 initialPlayer :: Player
 initialPlayer = Player
     { location = "Starting Room"
-    , inventory = []
+    , inventory = [goldCoin]
     , life = 90
     , stats = PlayerStats { vitality = 100, attack = 20, defense = 5, agility = 20 }
     , quests = []

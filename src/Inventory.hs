@@ -4,7 +4,7 @@ import Types
 import Utils
 import Control.Monad.State
 import Control.Monad(when)
-import Data.List (find)
+import Data.List (find, partition)
 import Data.Char(toLower)
 import Data.Maybe(isJust)
 import Control.Applicative((<|>))
@@ -26,12 +26,10 @@ openInventory inCombat = do
     let inventoryItems = inventory player
     liftIO $ if null inventoryItems
         then putStrLn "Your inventory is empty."
-        else mapM_ (putStrLn . ("  - " ++) . itemName) inventoryItems
+        else mapM_ (putStrLn . ("  - " ++) . formatItem) inventoryItems
 
     -- Enter inventory interaction and return updated player
     inventoryInteraction inCombat player
-
-
 
 
 
@@ -79,9 +77,19 @@ dropItem itemNameInput = do
             let updatedPlayer = player { inventory = updatedInventory }
 
             -- Add the item to the current room
-            let updatedRoomItems = item : items currentRoom
+            -- Check if an item with the same name already exists in the room
+            let (matchingRoomItems, otherRoomItems) = partition (\i -> itemName i == itemName item) (items currentRoom)
+            let updatedRoomItems = case matchingRoomItems of
+                    [existingItem] -> 
+                        let combinedItem = existingItem { quantity = quantity existingItem + quantity item }
+                        in combinedItem : otherRoomItems
+                    [] -> item : otherRoomItems
+                    _ -> otherRoomItems
+
+            -- Update the room and world
             let updatedRoom = currentRoom { items = updatedRoomItems }
             let updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world state)
+
 
             -- Update the game state
             put state { playerState = updatedPlayer, world = updatedWorld }
@@ -135,8 +143,15 @@ useItem itemNameInput = do
                             -- Apply the effect
                             let newPlayer = applyEffect eff player
 
-                            -- Remove the used item from the inventory
-                            let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory newPlayer)
+                            -- Update inventory: decrement quantity or remove if quantity reaches 0
+                            let updatedInventory = 
+                                    if quantity item > 1
+                                    then map (\i -> if itemName i == itemName item 
+                                                    then i { quantity = quantity i - 1 }
+                                                    else i) 
+                                             (inventory newPlayer)
+                                    else filter (\i -> itemName i /= itemName item) (inventory newPlayer)
+
 
                             -- Update the `playerState` with modified inventory
                             let finalPlayer = newPlayer { inventory = updatedInventory }

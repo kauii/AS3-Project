@@ -20,7 +20,7 @@ printRoomDescription = do
     let currentRoom = getPlayerRoom player (world gameState)
     let gameFlags = flags gameState
 
-    let itemNames = map itemName (items currentRoom)
+    let itemNames = map formatItem (items currentRoom)
     let itemLine = if null itemNames
                    then "There are no items in the room."
                    else "The following items are in the room: " ++ intercalate ", " itemNames
