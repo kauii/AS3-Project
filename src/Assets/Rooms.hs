@@ -8,6 +8,8 @@ import Assets.ProgressRelevant.Doors
 import Assets.ProgressRelevant.Items
 import Assets.ProgressRelevant.NPCs
 import Assets.RandomEntities.RandomizedItems
+import Assets.RandomEntities.RandomizedEnemies
+
 
 
 -- A sample room
@@ -32,7 +34,7 @@ hallway = Room
     , exits = [(South, "Starting Room"), (East, "Armory")]
     , roomObjects = []
     , items = [mysteriousPotion]
-    , enemies = []
+    , enemies = [goblin, rat, skeleton]
     , doors = []
     , npcs = []
     , difficulty = Easy

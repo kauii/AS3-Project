@@ -7,6 +7,7 @@ import Types
 import Utils.Utils
 import Control.Monad.State
 import System.Random (randomRIO)
+import System.Console.ANSI
 
 enterCombat :: StateT GameState IO ()
 enterCombat = do
@@ -33,8 +34,8 @@ combatLoop player enemiesCurrent = do
     if null enemiesCurrent
         then do
             -- Collect loot from defeated enemies
-            let defeatedLoot = collectLoot (enemies currentRoom)
-                updatedRoomItems = foldl addItemToRoom (items currentRoom) defeatedLoot
+            defeatedLoot <- collectLoot (enemies currentRoom)
+            let updatedRoomItems = foldl addItemToRoom (items currentRoom) defeatedLoot
                 updatedRoom = currentRoom 
                               { enemies = []  -- Remove enemies from the room
                               , items = updatedRoomItems  -- Add combined loot to room's items
@@ -44,10 +45,12 @@ combatLoop player enemiesCurrent = do
             -- Update the game state
             put state { world = updatedWorld }
 
-            -- Notify the player
-            liftIO $ putStrLn "\nAll enemies defeated! Loot has been added to the room:"
-            liftIO $ mapM_ (putStrLn . formatItem) defeatedLoot
-            
+            if null defeatedLoot
+                then liftIO $ printColored Green "\nAll enemies defeated!"
+                else do
+                    liftIO $ printColored Green "\nAll enemies defeated! Loot has been added to the room:"
+                    liftIO $ mapM_ (printColored Magenta . formatItem) defeatedLoot
+
             lift pressEnterToContinue
         else if life player <= 0
             then do
@@ -172,8 +175,18 @@ attemptFlee player enemies remainingCombatants = do
             processTurns remainingCombatants player enemies
 
 -- | Collect loot from all defeated enemies
-collectLoot :: [Enemy] -> [Item]
-collectLoot enemies = concatMap loot enemies
+collectLoot :: [Enemy] -> StateT GameState IO [Item]
+collectLoot enemies = do
+    -- For each enemy, generate a 50% chance to drop loot
+    lootDrops <- liftIO $ mapM dropWithChance enemies
+    return $ concat lootDrops
+  where
+    dropWithChance :: Enemy -> IO [Item]
+    dropWithChance enemy = do
+        chance <- randomRIO (1 :: Int, 100 :: Int)  -- Generate a number between 1 and 100
+        if chance <= 25
+            then return (loot enemy)  -- Drop the loot if the chance is 50% or less
+            else return []            -- No loot dropped if chance is greater than 50%
 
 addItemToRoom :: [Item] -> Item -> [Item]
 addItemToRoom roomItems newItem =

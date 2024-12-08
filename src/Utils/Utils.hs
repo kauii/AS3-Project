@@ -94,17 +94,34 @@ describeEffect Nothing = "No effects."
 describeEffect (Just effect) =
     let stats = case modifyStats effect of
                   Nothing -> []
-                  Just stats -> [ colorize Green"Stat Changes: " ++ "Max Life: " ++ show (vitality stats) ++ ", Attack: " ++ show (attack stats) ++ ", Defense: " ++ show (defense stats) ++ ", Agility: " ++ show (agility stats)]
+                  Just statChanges -> 
+                      let formatStat name value =
+                            if value > 0 then name ++ ": " ++ colorize Green ("+" ++ show value)
+                            else if value < 0 then name ++ ": " ++ colorize Red (show value)
+                            else ""
+
+                          statList = filter (not . null)
+                            [ formatStat "HP" (vitality statChanges)
+                            , formatStat "ATK" (attack statChanges)
+                            , formatStat "DEF" (defense statChanges)
+                            , formatStat "SPD" (agility statChanges)
+                            ]
+                      in if null statList then [] else [unwords statList]
+
         healing = case heal effect of
                     Nothing -> []
-                    Just amount -> [colorize Red "Healing: " ++ "Restores " ++ show amount ++ " HP"]
+                    Just amount -> [colorize Red $ "Restores " ++ show amount ++ " HP"]
+
         unlocking = case unlockDoor effect of
                       Nothing -> []
-                      Just door -> [ colorize Cyan "Unlocks: " ++ door]
+                      Just door -> [colorize Cyan $ "Unlocks: " ++ door]
+
         effectDescriptions = stats ++ healing ++ unlocking
+
     in if null effectDescriptions
        then "No effects."
        else unlines effectDescriptions
+
 
 pressEnterToContinue :: IO ()
 pressEnterToContinue = do

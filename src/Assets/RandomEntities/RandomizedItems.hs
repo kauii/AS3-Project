@@ -1,6 +1,9 @@
 module Assets.RandomEntities.RandomizedItems (module Assets.RandomEntities.RandomizedItems) where
 
 import Types
+
+randomizedItems :: [Item]
+randomizedItems = [healthPotion, mysteriousPotionRandom, strengthElixir, enchantedHerb, speedBerry, strongHealingPotion]
  
 healthPotion :: Item
 healthPotion = Item

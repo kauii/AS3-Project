@@ -102,6 +102,7 @@ useItem itemNameInput inCombat = do
                     putStrLn $ "\n" ++ itemAscii item  -- Display the ASCII art
                     putStrLn $ "You used the " ++ itemName item ++ "."
                     printColored Green "Effects applied!"
+                    putStrLn $ describeEffect (effect item)  -- Display detailed effect description
                     pressEnterToContinue
                 return finalPlayer
             _ -> do

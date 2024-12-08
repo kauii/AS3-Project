@@ -32,6 +32,7 @@ library
       Assets.ProgressRelevant.NPCs
       Assets.ProgressRelevant.RoomObjects
       Assets.RandomEntities.RandomizedEnemies
+      Assets.RandomEntities.RandomizedEnemiesLoot
       Assets.RandomEntities.RandomizedItems
       Assets.Rooms
       Fight
@@ -41,6 +42,7 @@ library
       Types
       Utils.FlagsUtils
       Utils.Printer
+      Utils.Randomizer
       Utils.Utils
   other-modules:
       Paths_AS3_Project
