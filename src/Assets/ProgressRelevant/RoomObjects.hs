@@ -15,7 +15,7 @@ sign = RoomObject {
 
 chandelier :: RoomObject
 chandelier = RoomObject {
-    objectName = "Sign",
+    objectName = "Chandelier",
     descriptions = [("A low hanging chandelier. You notice that a candle is missing.", "chandelier_fixed", False), ("A low hanging chandelier. All candles are burning brightly", "chandelier_fixed", True)],
     roomObjectItems = [],
     roomActions = [
@@ -113,6 +113,14 @@ cabinet = RoomObject {
                 else do
                     liftIO $ putStrLn "The cabinet is already open.")
     ]
+}
+
+anvil :: RoomObject
+anvil = RoomObject {
+    objectName = "Anvil",
+    descriptions = [("The runes seem to hypnotize you. The longer you stare at them, the better you seem to understand them. They say: Move the former owner to the side!", "default_true", True)],
+    roomObjectItems = [],
+    roomActions = []
 }
 
 switches :: RoomObject

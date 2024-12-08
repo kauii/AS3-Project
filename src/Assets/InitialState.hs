@@ -6,17 +6,20 @@ import qualified Data.Map as Map
 import Utils.Utils
 import Types (ItemType(KeyItem))
 import Assets.Rooms
+import Assets.ProgressRelevant.NPCs (librarian)
+import Assets.ProgressRelevant.Items
 
 -- Initial game state
 initialState :: GameState
 initialState = GameState
     { playerState = initialPlayer
-    , world = [startingRoom, hallway, armory]
+    , world = [entranceHall, greatHall, library, diningRoom, armory, kitchen, secretPassage]
     , flags = Map.fromList [
         ("default_true", True),
         ("chandelier_fixed", False),
         ("chest_unlocked", False),
         ("taken_dinner_key", False),
+        ("cabinet_opened", False),
         ("passage_detected", False)
     ]
     }
@@ -43,7 +46,7 @@ object1 = RoomObject {
 -- Initial player state
 initialPlayer :: Player
 initialPlayer = Player
-    { location = "Starting Room"
+    { location = "Entrance Hall"
     , inventory = []
     , life = 90
     , stats = PlayerStats { vitality = 100, attack = 20, defense = 5, agility = 20 }

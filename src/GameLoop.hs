@@ -157,11 +157,11 @@ talkTo npcNameInput = do
 -- Function to handle the "inspect" command
 inspect :: String -> StateT GameState IO ()
 inspect "room" = printRoomDescription -- Print room description
-inspect object = do
+inspect objectName = do
     gameState <- get
     let player = playerState gameState
     let room = getPlayerRoom player (world gameState) -- Assuming a function or field to get current room
-        maybeObject = findObjectByName object (roomObjects room)
+        maybeObject = findObjectByName objectName (roomObjects room)
     case maybeObject of
         Nothing -> liftIO $ putStrLn "Object not found."
         Just obj -> inspectObject obj

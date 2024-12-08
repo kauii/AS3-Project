@@ -98,8 +98,21 @@ armory =  Room {
     items = [],
     enemies = [],
     doors = [],
+    npcs = [blacksmith],
+    difficulty = Normal
+}
+
+forge :: Room
+forge =  Room {
+    roomName = "Forge",
+    description = [("A blazing forge and glowing runes on an anvil.", "default_true", True)],
+    exits = [(Up, "Armory")],
+    roomObjects = [anvil],
+    items = [],
+    enemies = [],
+    doors = [],
     npcs = [],
-    difficulty = Hard
+    difficulty = Normal
 }
 
 -- A sample room
