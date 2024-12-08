@@ -143,6 +143,7 @@ data Action = Go Direction         -- Move in a specific direction
 instance Show RoomObject where
     show (RoomObject name descs items actions) =
         "RoomObject { " ++
+        "name" ++ show name ++ ", " ++
         "descriptions = " ++ show descs ++ ", " ++
         "roomObjectItems = " ++ show items ++ ", " ++
         "roomActions = <functions> }"

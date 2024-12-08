@@ -202,3 +202,10 @@ checkIfInInventory itemNameToCheck qtyToCheck = do
     state <- get
     let player = playerState state
     return $ any (\i -> itemName i == itemNameToCheck && quantity i >= qtyToCheck) (inventory player)
+
+addDirectionToRoom :: String -> Direction -> String -> [Room] -> [Room]
+addDirectionToRoom targetRoomName direction targetRoomNameToAdd rooms =
+    map (\room ->
+        if roomName room == targetRoomName
+        then room { exits = (direction, targetRoomNameToAdd) : exits room }
+        else room) rooms
