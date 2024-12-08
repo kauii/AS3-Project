@@ -8,6 +8,7 @@ In this game you can:
 - **Combat Enemies**: Encounter randomized enemies that match the difficulty of the room. Each enemy may drop loot upon defeat.
 - **Collect Items**: Find and use randomized consumables, weapons, and armor to aid your journey. Items are generated with different quantities and effects.
 - **Interact with NPCs and Objects**: Engage in conversations, inspect objects, and manipulate the environment to uncover secrets and progress in the story.
+- **End the Game**: By defeating the final boss or getting defeated during your adventure.
 
 ## Key Features:
 - **Randomization**: Items and enemies are randomized to provide a different experience each playthrough.
