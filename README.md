@@ -68,9 +68,7 @@ You have two options for installing Stack:
    ```bash
    stack build
    ```
-   
-   *If you make any changes to your project, don't forget to first run stack build again before executing the main.*
-   
+      
 5. Now try to run the project using the command:
    
      ```bash
