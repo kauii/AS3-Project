@@ -177,6 +177,15 @@ healthPotion = Item
     , itemDescription = "A small vial filled with a red liquid. Restores 20 health."
     , effect = Just $ Effect { modifyStats = Nothing, heal = Just 20, unlockDoor = Nothing }
     , itemType = Consumable
+    , itemAscii = unlines
+    [ "     _____"
+    , "    |_____|"
+    , "    /     \\"
+    , "   /       \\"
+    , "  |   ***   |"
+    , "   \\  ***  /"
+    , "    \\_____/"
+    ]
     }
 
 rustyKey :: Item

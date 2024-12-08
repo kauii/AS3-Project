@@ -54,7 +54,8 @@ data Item = Item {
     itemName :: String,            -- Name of the item
     itemDescription :: String,     -- Description of the item
     effect :: Maybe Effect,         -- Effect the item has when used (if any)
-    itemType :: ItemType
+    itemType :: ItemType,
+    itemAscii :: String
 } deriving (Show, Eq)
 
 -- Effects of items, which can modify player stats or state

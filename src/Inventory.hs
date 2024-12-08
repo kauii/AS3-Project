@@ -87,8 +87,10 @@ useItem itemNameInput inCombat = do
                 put state { playerState = finalPlayer }
                 when inCombat (setTurnEnded True)
                 liftIO $ do
+                    putStrLn $ "\n" ++ itemAscii item  -- Display the ASCII art
                     putStrLn $ "You used the " ++ itemName item ++ "."
                     putStrLn "Effects applied!"
+                    pressEnterToContinue
                 return finalPlayer
             _ -> do
                 liftIO $ putStrLn "This item cannot be used."
@@ -143,6 +145,7 @@ inspect itemNameInput = do
     state <- get
     let player = playerState state
     let currentRoom = getPlayerRoom player (world state)
+
     let maybeItemInInventory = find (\item -> map toLower (itemName item) == map toLower itemNameInput) (inventory player)
     let maybeItemInRoom = find (\item -> map toLower (itemName item) == map toLower itemNameInput) (items currentRoom)
 
@@ -151,8 +154,12 @@ inspect itemNameInput = do
             displayHeader (itemName item)
             putStrLn $ "Description: " ++ itemDescription item
             putStrLn $ describeEffect (effect item)
+            putStrLn $ "\n" ++ itemAscii item  -- Display the ASCII art
             pressEnterToContinue
-        Nothing -> liftIO $ putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not available to inspect."
+        Nothing -> liftIO $ do
+            putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not available to inspect."
+            pressEnterToContinue
+
 
 applyEffect :: Maybe Effect -> Player -> Player
 applyEffect Nothing player = player
