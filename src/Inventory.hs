@@ -25,8 +25,12 @@ openInventory inCombat = do
     liftIO $ putStrLn ""
 
     liftIO $ displaySmallHeader "Equipped Gear"
-    liftIO $ putStrLn $ "  Weapon: " ++ maybe "None" itemName (weapon player)
-    liftIO $ putStrLn $ "  Armor:  " ++ maybe "None" itemName (armor player)
+    case weapon player of
+        Just w  -> liftIO $ putStrLn $ "  Weapon: " ++ itemName w ++ " " ++ formatStatsFromEffect (effect w)
+        Nothing -> liftIO $ putStrLn "  Weapon: None"
+    case armor player of
+        Just a  -> liftIO $ putStrLn $ "  Armor:  " ++ itemName a ++ " " ++ formatStatsFromEffect (effect a)
+        Nothing -> liftIO $ putStrLn "  Armor:  None"
     liftIO $ putStrLn ""
     
     liftIO $ displaySmallHeader "Items"
@@ -140,7 +144,7 @@ dropItem itemNameInput = do
             liftIO $ putStrLn $ "You dropped " ++ itemName item ++ "."
         Nothing -> liftIO $ putStrLn "Item not found."
 
--- | Equips an item (either a weapon or armor) from the inventory.
+-- | Equips an item (either a weapon or armor) from the inventory and applies its effects.
 equipItem :: String -> StateT GameState IO ()
 equipItem itemNameInput = do
     state <- get
@@ -151,12 +155,14 @@ equipItem itemNameInput = do
         Just item -> case itemType item of
             Sword -> do
                 let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory player)
-                let updatedPlayer = player { weapon = Just item, inventory = updatedInventory }
+                let playerWithEffect = applyEffect (effect item) player
+                let updatedPlayer = playerWithEffect { weapon = Just item, inventory = updatedInventory }
                 put state { playerState = updatedPlayer }
                 liftIO $ putStrLn $ "You equipped the weapon: " ++ itemName item ++ "."
             Armor -> do
                 let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory player)
-                let updatedPlayer = player { armor = Just item, inventory = updatedInventory }
+                let playerWithEffect = applyEffect (effect item) player
+                let updatedPlayer = playerWithEffect { armor = Just item, inventory = updatedInventory }
                 put state { playerState = updatedPlayer }
                 liftIO $ putStrLn $ "You equipped the armor: " ++ itemName item ++ "."
             _ -> liftIO $ putStrLn "This item cannot be equipped."

@@ -200,3 +200,25 @@ checkIfInInventory itemNameToCheck qtyToCheck = do
     state <- get
     let player = playerState state
     return $ any (\i -> itemName i == itemNameToCheck && quantity i >= qtyToCheck) (inventory player)
+
+-- | Formats PlayerStats for display, showing only non-zero values with abbreviations.
+formatStats :: PlayerStats -> String
+formatStats stats =
+    let statList = filter (\(_, val) -> val /= 0) [
+            ("HP", vitality stats),
+            ("ATK", attack stats),
+            ("DEF", defense stats),
+            ("SPD", agility stats)  -- Using "SPD" for speed instead of "AGI"
+            ]
+    in if null statList
+       then ""
+       else "(" ++ unwords (map formatStat statList) ++ ")"
+  where
+    formatStat (abbr, val) = abbr ++ ": " ++ (if val > 0 then "+" else "") ++ show val
+
+-- | Formats the stats from an item's effect if they exist.
+formatStatsFromEffect :: Maybe Effect -> String
+formatStatsFromEffect (Just eff) = case modifyStats eff of
+    Just stats -> formatStats stats
+    Nothing    -> ""
+formatStatsFromEffect Nothing = ""

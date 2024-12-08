@@ -31,7 +31,7 @@ rustyKey = Item
 
 woodenSword :: Item
 woodenSword = Item
-    { itemName = "Sword"
+    { itemName = "Wooden Sword"
     , itemDescription = "A sharp blade, perfect for combat."
     , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 10, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
     , quantity = 1
