@@ -81,7 +81,15 @@ movePlayer dir = do
                                 liftIO $ putStrLn "You sense danger as you enter the room..."
                                 enterCombat  -- Call the combat system
                             printRoomDescription
-                Nothing -> liftIO $ putStrLn "You can't go that way!"
+                Nothing -> do
+                    -- Move to the room if no door blocks the path
+                    let newRoom = findRoom exitRoomName (world gameState)
+                    put $ gameState { playerState = player { location = exitRoomName } }
+                    liftIO $ putStrLn $ "You move to " ++ exitRoomName
+                    unless (null (enemies newRoom)) $ do
+                        liftIO $ putStrLn "You sense danger as you enter the room..."
+                        enterCombat  -- Call the combat system
+                    printRoomDescription
         Nothing -> liftIO $ putStrLn "You can't go that way!"
 
 
