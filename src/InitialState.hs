@@ -3,6 +3,7 @@ module InitialState (initialState) where
 import Types
 import Control.Monad.State
 import qualified Data.Map as Map
+import Utils
 
 object1 :: RoomObject
 object1 = RoomObject {
@@ -67,7 +68,7 @@ healthPotion = Item
     { itemName = "Health Potion"
     , itemDescription = "A small vial filled with a red liquid. Restores 20 health."
     , effect = Just $ Effect { modifyStats = Nothing, heal = Just 20, unlockDoor = Nothing }
-    , quantity = 2
+    , quantity = 1
     }
 
 -- Sample items
@@ -82,7 +83,7 @@ mysteriousPotion = Item
             , agility = 0 }
             , heal = Nothing
             , unlockDoor = Nothing }
-    , quantity = 2
+    , quantity = 1
     }
 
 rustyKey :: Item
@@ -110,7 +111,7 @@ goblin = Enemy
     , enemyAttack = 10
     , enemyDefense = 2
     , enemyAgility = 10
-    , loot = [goldCoin]
+    , loot = [goldCoin, healthPotion]
     }
 
 -- Sample enemy
@@ -130,7 +131,7 @@ goldCoin = Item
     { itemName = "Gold Coin"
     , itemDescription = "A shiny coin. Valuable for trade."
     , effect = Nothing
-    , quantity = 2
+    , quantity = 1
     }
 
 -- Sample door
@@ -148,13 +149,9 @@ questGiver = NPC {
     npcName = "Quest Giver",
     requiredItem = Just "Gold Coin",
     onInteraction = do
-        modify (\gs -> gs { flags = Map.insert "quest_completed" True (flags gs) })
+        setGameFlag "quest_completed" True
         liftIO $ putStrLn "Thank you for the Gold Coin! I grant you a Potion."
-        state <- get
-        let player = playerState state
-        let rewardItem = Item "Potion" "Restores health" Nothing 1
-        let updatedInventory = rewardItem : inventory player
-        put state { playerState = player { inventory = updatedInventory } },
+        addItemToPlayer healthPotion,
     dialogUnavailable = "I could really use a Gold Coin right now. Can you find one?"
 }
 

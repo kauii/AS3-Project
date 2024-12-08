@@ -1,6 +1,6 @@
 module Fight (enterCombat) where
 
-import Data.List (sortOn)
+import Data.List (sortOn, partition)
 import Inventory
 import Types
 import Utils
@@ -33,9 +33,10 @@ combatLoop player enemiesCurrent = do
         then do
             -- Collect loot from defeated enemies
             let defeatedLoot = collectLoot (enemies currentRoom)
+                updatedRoomItems = foldl addItemToRoom (items currentRoom) defeatedLoot
                 updatedRoom = currentRoom 
                               { enemies = []  -- Remove enemies from the room
-                              , items = items currentRoom ++ defeatedLoot -- Add loot to room's items
+                              , items = updatedRoomItems  -- Add combined loot to room's items
                               }
                 updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world state)
 
@@ -44,7 +45,7 @@ combatLoop player enemiesCurrent = do
 
             -- Notify the player
             liftIO $ putStrLn "All enemies defeated! Loot has been added to the room:"
-            liftIO $ mapM_ (putStrLn . ("  - " ++) . itemName) defeatedLoot
+            liftIO $ mapM_ (putStrLn . formatItem) defeatedLoot
             
             lift pressEnterToContinue
         else if life player <= 0
@@ -187,3 +188,12 @@ generateHealthBar currentHealth maxHealth barLength =
 collectLoot :: [Enemy] -> [Item]
 collectLoot enemies = concatMap loot enemies
 
+addItemToRoom :: [Item] -> Item -> [Item]
+addItemToRoom roomItems newItem =
+    let (matchingItems, otherItems) = partition (\i -> itemName i == itemName newItem) roomItems
+    in case matchingItems of
+        [existingItem] ->
+            let combinedItem = existingItem { quantity = quantity existingItem + quantity newItem }
+            in combinedItem : otherItems
+        [] -> newItem : otherItems
+        _ -> error "Unexpected multiple items with the same name in the room!"

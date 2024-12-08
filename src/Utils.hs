@@ -1,8 +1,8 @@
-module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded, formatItem) where
+module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, setGameFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded, formatItem, addItemToPlayer, removeItemFromPlayer, checkIfInInventory) where
 
 import Types
-import Data.Maybe (fromMaybe)
-import Data.List(find)
+import Data.Maybe (fromMaybe, mapMaybe)
+import Data.List(find, partition)
 import Data.Char(toLower)
 import qualified Data.Map as Map
 import Control.Monad.State
@@ -68,6 +68,14 @@ checkFlag key requiredState flags =
         Just state -> state == requiredState
         Nothing    -> not requiredState  -- Default to False if flag not found
 
+-- Set a flag in the GameState
+setGameFlag :: String -> Bool -> StateT GameState IO ()
+setGameFlag flagName flagValue = do
+    state <- get
+    let updatedFlags = Map.insert flagName flagValue (flags state)
+    put state { flags = updatedFlags }
+
+
 -- Convert healing effect to a readable string
 describeHealing :: Maybe Int -> String
 describeHealing Nothing = "No healing effect."
@@ -127,3 +135,37 @@ formatItem :: Item -> String
 formatItem item
     | quantity item > 1 = show (quantity item) ++ "x " ++ itemName item
     | otherwise = itemName item
+
+addItemToPlayer :: Item -> StateT GameState IO ()
+addItemToPlayer newItem = do
+    state <- get
+    let player = playerState state
+    let (matchingItems, otherItems) = partition (\i -> itemName i == itemName newItem) (inventory player)
+    let updatedInventory = case matchingItems of
+            [existingItem] ->
+                let combinedItem = existingItem { quantity = quantity existingItem + quantity newItem }
+                in combinedItem : otherItems
+            [] -> newItem : otherItems
+            _ -> error "Unexpected multiple items with the same name in the inventory!"
+    put state { playerState = player { inventory = updatedInventory } }
+
+removeItemFromPlayer :: String -> Int -> StateT GameState IO ()
+removeItemFromPlayer itemNameToRemove qtyToRemove = do
+    state <- get
+    let player = playerState state
+    let updatedInventory = mapMaybe (\i ->
+            if itemName i == itemNameToRemove
+            then
+                if quantity i > qtyToRemove
+                then Just i { quantity = quantity i - qtyToRemove }
+                else if quantity i == qtyToRemove
+                then Nothing -- Remove the item completely
+                else Just i -- Do nothing if insufficient quantity
+            else Just i) (inventory player)
+    put state { playerState = player { inventory = updatedInventory } }
+
+checkIfInInventory :: String -> Int -> StateT GameState IO Bool
+checkIfInInventory itemNameToCheck qtyToCheck = do
+    state <- get
+    let player = playerState state
+    return $ any (\i -> itemName i == itemNameToCheck && quantity i >= qtyToCheck) (inventory player)
