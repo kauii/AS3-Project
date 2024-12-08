@@ -25,13 +25,14 @@ data Direction = North | South | East | West deriving (Show, Eq)
 -- Rooms, which can contain items, enemies, NPCs, and doors
 data Room = Room {
     roomName :: String,            -- Name of the room
-    description :: String,         -- Description shown to the player
+    description :: [(String, String, Bool)],         -- Description shown to the player
     roomObjects :: [RoomObject],
     exits :: [(Direction, String)], -- Possible exits (Direction, connected room name)
     items :: [Item],               -- Items in the room
     enemies :: [Enemy],            -- Enemies present in the room
     doors :: [Door],                -- Doors connected to this room
-    npcs :: [NPC]
+    npcs :: [NPC],
+    difficulty :: Difficulty
 } deriving (Show)
 
 data RoomObject = RoomObject {
@@ -54,6 +55,7 @@ data Item = Item {
     itemName :: String,            -- Name of the item
     itemDescription :: String,     -- Description of the item
     effect :: Maybe Effect,         -- Effect the item has when used (if any)
+    quantity :: Int,
     itemType :: ItemType,
     itemAscii :: String
 } deriving (Show, Eq)
