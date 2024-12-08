@@ -2,11 +2,11 @@ module Inventory (openInventory) where
 
 import Types
 import Utils.Utils
+import Utils.Printer
 import Control.Monad.State
 import Control.Monad
 import Data.List (find, partition)
 import Data.Char (toLower)
-import Data.Maybe (isJust)
 import Control.Applicative ((<|>))
 import System.Console.ANSI
 

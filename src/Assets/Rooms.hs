@@ -9,6 +9,7 @@ import Assets.ProgressRelevant.Items
 import Assets.ProgressRelevant.NPCs
 import Assets.RandomEntities.RandomizedItems
 import Assets.RandomEntities.RandomizedEnemies
+import Assets.RandomEntities.RandomizedEnemiesLoot
 
 
 
@@ -19,7 +20,7 @@ startingRoom = Room {
     description = [("A small, dimly lit room with stone walls.", "default_true", True)],
     exits = [(North, "Hallway")],
     roomObjects = [],
-    items = [healthPotion, rustyKey, goldCoin, mysteriousPotion, strengthElixir, enchantedHerb, speedBerry, strongHealingPotion],
+    items = [healthPotion, rustyKey, goldCoin, mysteriousPotion, strengthElixir, enchantedHerb, speedBerry, strongHealingPotion, holySword, draconicArmor],
     enemies = [],
     doors = [woodenDoor],
     npcs = [questGiver, villager],

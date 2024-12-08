@@ -16,7 +16,7 @@ goblin = Enemy
     , enemyDefense = 2
     , enemyAgility = 10
     , enemyDifficulty = Easy
-    , loot = [meat]
+    , loot = [meat, dagger]
     }
 
 -- Sample enemy
@@ -56,7 +56,7 @@ bandit = Enemy
     , enemyDefense = 3
     , enemyAgility = 9
     , enemyDifficulty = Easy
-    , loot = [cape]
+    , loot = [cape, dagger]
     }
 
 skeleton :: Enemy
@@ -95,7 +95,7 @@ darkKnight = Enemy
     , enemyDefense = 12
     , enemyAgility = 10
     , enemyDifficulty = Normal
-    , loot = [darkKnightArmor]
+    , loot = [darkKnightArmor, darkKnightAxe]
     }
 
 troll :: Enemy
@@ -134,7 +134,7 @@ fallenPaladin = Enemy
     , enemyDefense = 25
     , enemyAgility = 14
     , enemyDifficulty = Hard
-    , loot = [holySword]
+    , loot = [holySword, cape]
     }
 
 wyvern :: Enemy
@@ -147,5 +147,5 @@ wyvern = Enemy
     , enemyDefense = 15
     , enemyAgility = 25
     , enemyDifficulty = Hard
-    , loot = [wyvernFeather]
+    , loot = [wyvernFeather, meat]
     }

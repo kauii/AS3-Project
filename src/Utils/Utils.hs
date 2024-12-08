@@ -77,70 +77,6 @@ setGameFlag flagName flagValue = do
     let updatedFlags = Map.insert flagName flagValue (flags state)
     put state { flags = updatedFlags }
 
-
--- Convert healing effect to a readable string
-describeHealing :: Maybe Int -> String
-describeHealing Nothing = "No healing effect."
-describeHealing (Just amount) = "Heals " ++ show amount ++ " HP."
-
--- Convert door unlocking effect to a readable string
-describeUnlock :: Maybe String -> String
-describeUnlock Nothing = "No unlocking effect."
-describeUnlock (Just door) = "Unlocks the door: " ++ door
-
--- Convert Effect to a readable string
-describeEffect :: Maybe Effect -> String
-describeEffect Nothing = "No effects."
-describeEffect (Just effect) =
-    let stats = case modifyStats effect of
-                  Nothing -> []
-                  Just statChanges -> 
-                      let formatStat name value =
-                            if value > 0 then name ++ ": " ++ colorize Green ("+" ++ show value)
-                            else if value < 0 then name ++ ": " ++ colorize Red (show value)
-                            else ""
-
-                          statList = filter (not . null)
-                            [ formatStat "HP" (vitality statChanges)
-                            , formatStat "ATK" (attack statChanges)
-                            , formatStat "DEF" (defense statChanges)
-                            , formatStat "SPD" (agility statChanges)
-                            ]
-                      in if null statList then [] else [unwords statList]
-
-        healing = case heal effect of
-                    Nothing -> []
-                    Just amount -> [colorize Red $ "Restores " ++ show amount ++ " HP"]
-
-        unlocking = case unlockDoor effect of
-                      Nothing -> []
-                      Just door -> [colorize Cyan $ "Unlocks: " ++ door]
-
-        effectDescriptions = stats ++ healing ++ unlocking
-
-    in if null effectDescriptions
-       then "No effects."
-       else unlines effectDescriptions
-
-
-pressEnterToContinue :: IO ()
-pressEnterToContinue = do
-    putStrLn "\nPress Enter to continue..."
-    _ <- getLine
-    return ()
-
-displayHeader :: String -> IO ()
-displayHeader caption = do
-    let lineLength = length caption + 4
-        border = replicate lineLength '═'
-    putStrLn $ "╔" ++ border ++ "╗"
-    putStrLn $ "║  " ++ caption ++ "  ║"
-    putStrLn $ "╚" ++ border ++ "╝"
-
-displaySmallHeader :: String -> IO ()
-displaySmallHeader caption = do
-    putStrLn $ ">>> " ++ caption ++ " <<<"
-
 -- | Set the "turnEnded" flag
 setTurnEnded :: Bool -> StateT GameState IO ()
 setTurnEnded value = do
@@ -153,32 +89,6 @@ isTurnEnded :: StateT GameState IO Bool
 isTurnEnded = do
     state <- get
     return $ Map.findWithDefault False "turnEnded" (flags state)
-
--- | Print health bars for enemies and player
-printCombatHealthBars :: [Enemy] -> Player -> IO ()
-printCombatHealthBars enemies player = do
-    -- Print enemies section
-    displayHeader "ENEMIES"
-    mapM_ printEnemyHealth enemies
-
-    -- Print player section
-    displayHeader "PLAYER"
-    putStrLn $ generateHealthBar (life player) (vitality (stats player)) 20
-
--- | Print a single enemy's health with a newline after each
-printEnemyHealth :: Enemy -> IO ()
-printEnemyHealth enemy = do
-    putStrLn $ "- " ++ enemyName enemy
-    putStrLn $ generateHealthBar (enemyHealth enemy) (enemyMaxHealth enemy) 20
-    putStrLn ""  -- Add a blank line after each enemy
-
--- | Generate a single health bar
-generateHealthBar :: Int -> Int -> Int -> String
-generateHealthBar currentHealth maxHealth barLength =
-    let filledLength = (currentHealth * barLength) `div` maxHealth
-        emptyLength = barLength - filledLength
-    in replicate filledLength '█' ++ replicate emptyLength '░' ++ 
-       " (" ++ show currentHealth ++ "/" ++ show maxHealth ++ ")"
        
 formatItem :: Item -> String
 formatItem item
@@ -240,25 +150,3 @@ formatStatsFromEffect (Just eff) = case modifyStats eff of
     Just stats -> formatStats stats
     Nothing    -> ""
 formatStatsFromEffect Nothing = ""
-
--- | Prints a string with a specified color.
-printColored :: Color -> String -> IO ()
-printColored color text = do
-    setSGR [SetColor Foreground Vivid color]
-    putStrLn text
-    setSGR [Reset]
-
--- | Returns a string wrapped in color (useful for inline color).
-colorize :: Color -> String -> String
-colorize color text = 
-    setSGRCode [SetColor Foreground Vivid color] ++ text ++ setSGRCode [Reset]
-
-printAvailableActions :: [String] -> IO ()
-printAvailableActions actions = putStrLn $
-    colorize Cyan "Available actions: " ++
-    colorize White "(" ++
-    colorize White (concatMap (\action -> action ++ ", ") (init actions)) ++
-    colorize Red (last actions) ++
-    colorize White ")"
-
-

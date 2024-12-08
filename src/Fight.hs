@@ -5,6 +5,7 @@ import Data.Maybe(fromJust)
 import Inventory
 import Types
 import Utils.Utils
+import Utils.Printer
 import Control.Monad.State
 import System.Random (randomRIO)
 import System.Console.ANSI

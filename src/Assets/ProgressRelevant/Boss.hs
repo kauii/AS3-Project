@@ -2,6 +2,7 @@ module Assets.ProgressRelevant.Boss (enterBossBattle) where
 
 import Types
 import Utils.Utils
+import Utils.Printer
 import Inventory
 import Control.Monad.State
 import Control.Monad(when)

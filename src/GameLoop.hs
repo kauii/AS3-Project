@@ -122,6 +122,7 @@ takeItem itemNameInput = do
 
             put gameState { playerState = updatedPlayer, world = updatedWorld }
             liftIO $ printColored Green $ "Added " ++ itemName item ++ " to your inventory."
+            liftIO $ putStrLn $ "\n" ++ itemAscii item  -- Display the ASCII art
         Nothing -> liftIO $ printColored Yellow $ "The item \"" ++ itemNameInput ++ "\" is not in this room."
 
 talkTo :: String -> StateT GameState IO ()
