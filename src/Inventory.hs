@@ -101,14 +101,14 @@ useItem itemNameInput inCombat = do
                 liftIO $ do
                     putStrLn $ "\n" ++ itemAscii item  -- Display the ASCII art
                     putStrLn $ "You used the " ++ itemName item ++ "."
-                    putStrLn "Effects applied!"
+                    printColored Green "Effects applied!"
                     pressEnterToContinue
                 return finalPlayer
             _ -> do
-                liftIO $ putStrLn "This item cannot be used."
+                liftIO $ printColored Red "This item cannot be used."
                 return player
         Nothing -> do
-            liftIO $ putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not in your inventory."
+            liftIO $ printColored Yellow $ "The item \"" ++ itemNameInput ++ "\" is not in your inventory."
             return player
 
 -- | Drops an item from the inventory and places it in the current room.
@@ -142,7 +142,7 @@ dropItem itemNameInput = do
             -- Update the game state
             put state { playerState = updatedPlayer, world = updatedWorld }
             liftIO $ putStrLn $ "You dropped " ++ itemName item ++ "."
-        Nothing -> liftIO $ putStrLn "Item not found."
+        Nothing -> liftIO $ printColored Yellow "Item not found."
 
 -- | Equips an item (either a weapon or armor) from the inventory and applies its effects.
 equipItem :: String -> StateT GameState IO ()
@@ -158,15 +158,15 @@ equipItem itemNameInput = do
                 let playerWithEffect = applyEffect (effect item) player
                 let updatedPlayer = playerWithEffect { weapon = Just item, inventory = updatedInventory }
                 put state { playerState = updatedPlayer }
-                liftIO $ putStrLn $ "You equipped the weapon: " ++ itemName item ++ "."
+                liftIO $ printColored Green $ "You equipped the weapon: " ++ itemName item ++ "."
             Armor -> do
                 let updatedInventory = filter (\i -> itemName i /= itemName item) (inventory player)
                 let playerWithEffect = applyEffect (effect item) player
                 let updatedPlayer = playerWithEffect { armor = Just item, inventory = updatedInventory }
                 put state { playerState = updatedPlayer }
-                liftIO $ putStrLn $ "You equipped the armor: " ++ itemName item ++ "."
-            _ -> liftIO $ putStrLn "This item cannot be equipped."
-        Nothing -> liftIO $ putStrLn "Item not found."
+                liftIO $ printColored Green $ "You equipped the armor: " ++ itemName item ++ "."
+            _ -> liftIO $ printColored Red "This item cannot be equipped."
+        Nothing -> liftIO $ printColored Yellow "Item not found."
 
 inspect :: String -> StateT GameState IO ()
 inspect itemNameInput = do
@@ -185,7 +185,7 @@ inspect itemNameInput = do
             putStrLn $ "\n" ++ itemAscii item  -- Display the ASCII art
             pressEnterToContinue
         Nothing -> liftIO $ do
-            putStrLn $ "The item \"" ++ itemNameInput ++ "\" is not available to inspect."
+            printColored Yellow $ "The item \"" ++ itemNameInput ++ "\" is not available to inspect."
             pressEnterToContinue
 
 
