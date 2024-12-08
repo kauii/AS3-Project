@@ -4,6 +4,7 @@ import Types
 import Control.Monad.State
 import Data.List (find)
 import Utils.Printer
+import Data.Char (toLower)
 
 -- Function to inspect an object
 inspectObject :: RoomObject -> StateT GameState IO ()
@@ -37,4 +38,4 @@ objectInspectLoop obj = do
 
 -- Utility to find an object by name in the room
 findObjectByName :: String -> [RoomObject] -> Maybe RoomObject
-findObjectByName name = find (\obj -> name == objectName obj)
+findObjectByName name = find (\obj -> map toLower name == map toLower (objectName obj)) -- Assuming RoomObject has objectName

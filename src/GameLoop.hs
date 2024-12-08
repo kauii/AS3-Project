@@ -11,6 +11,7 @@ import Data.Char (toLower)
 import RoomObjectInteraction (findObjectByName, inspectObject)
 import Utils.Printer
 import System.Console.ANSI
+import System.Exit
 
 -- | Run the game loop using StateT to manage the game state
 runGameLoop :: GameState -> IO ()
@@ -19,6 +20,14 @@ runGameLoop = evalStateT gameLoop
 -- | The main game loop, running within StateT monad
 gameLoop :: StateT GameState IO ()
 gameLoop = do
+    gameState <- get
+    let player = playerState gameState
+    let health = life player
+
+    when (health <= 0) $ do
+        liftIO $ printColored Red "You have died. Game Over!"
+        liftIO exitSuccess -- Exit the loop
+
     liftIO $ printAvailableActions ["Go", "Take", "OpenInv", "Inspect", "TalkTo", "Quit"]
     action <- liftIO getLine
     let parsedAction = parseAction action
@@ -158,11 +167,11 @@ talkTo npcNameInput = do
 -- Function to handle the "inspect" command
 inspect :: String -> StateT GameState IO ()
 inspect "room" = printRoomDescription -- Print room description
-inspect object = do
+inspect objectName = do
     gameState <- get
     let player = playerState gameState
     let room = getPlayerRoom player (world gameState) -- Assuming a function or field to get current room
-        maybeObject = findObjectByName object (roomObjects room)
+        maybeObject = findObjectByName objectName (roomObjects room)
     case maybeObject of
         Nothing -> liftIO $ printColored Yellow "Object not found."
         Just obj -> inspectObject obj
