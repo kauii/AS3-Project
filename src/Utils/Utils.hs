@@ -94,13 +94,13 @@ describeEffect Nothing = "No effects."
 describeEffect (Just effect) =
     let stats = case modifyStats effect of
                   Nothing -> []
-                  Just stats -> ["Stat Changes: Max Life: " ++ show (vitality stats) ++ ", Attack: " ++ show (attack stats) ++ ", Defense: " ++ show (defense stats) ++ ", Agility: " ++ show (agility stats)]
+                  Just stats -> [ colorize Green"Stat Changes: " ++ "Max Life: " ++ show (vitality stats) ++ ", Attack: " ++ show (attack stats) ++ ", Defense: " ++ show (defense stats) ++ ", Agility: " ++ show (agility stats)]
         healing = case heal effect of
                     Nothing -> []
-                    Just amount -> ["Healing: Restores " ++ show amount ++ " HP"]
+                    Just amount -> [colorize Red "Healing: " ++ "Restores " ++ show amount ++ " HP"]
         unlocking = case unlockDoor effect of
                       Nothing -> []
-                      Just door -> ["Unlocks: " ++ door]
+                      Just door -> [ colorize Cyan "Unlocks: " ++ door]
         effectDescriptions = stats ++ healing ++ unlocking
     in if null effectDescriptions
        then "No effects."

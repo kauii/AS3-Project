@@ -180,9 +180,9 @@ inspect itemNameInput = do
     case maybeItemInInventory <|> maybeItemInRoom of
         Just item -> liftIO $ do
             displayHeader (itemName item)
-            putStrLn $ "Description: " ++ itemDescription item
-            putStrLn $ describeEffect (effect item)
             putStrLn $ "\n" ++ itemAscii item  -- Display the ASCII art
+            putStrLn $ itemDescription item
+            putStrLn $ describeEffect (effect item)
             pressEnterToContinue
         Nothing -> liftIO $ do
             printColored Yellow $ "The item \"" ++ itemNameInput ++ "\" is not available to inspect."
