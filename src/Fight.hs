@@ -1,9 +1,10 @@
 module Fight (enterCombat) where
 
-import Data.List (sortOn)
+import Data.List(find, sortOn, partition)
+import Data.Maybe(fromJust)
 import Inventory
 import Types
-import Utils
+import Utils.Utils
 import Control.Monad.State
 import System.Random (randomRIO)
 
@@ -33,9 +34,10 @@ combatLoop player enemiesCurrent = do
         then do
             -- Collect loot from defeated enemies
             let defeatedLoot = collectLoot (enemies currentRoom)
+                updatedRoomItems = foldl addItemToRoom (items currentRoom) defeatedLoot
                 updatedRoom = currentRoom 
                               { enemies = []  -- Remove enemies from the room
-                              , items = items currentRoom ++ defeatedLoot -- Add loot to room's items
+                              , items = updatedRoomItems  -- Add combined loot to room's items
                               }
                 updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world state)
 
@@ -43,13 +45,13 @@ combatLoop player enemiesCurrent = do
             put state { world = updatedWorld }
 
             -- Notify the player
-            liftIO $ putStrLn "All enemies defeated! Loot has been added to the room:"
-            liftIO $ mapM_ (putStrLn . ("  - " ++) . itemName) defeatedLoot
+            liftIO $ putStrLn "\nAll enemies defeated! Loot has been added to the room:"
+            liftIO $ mapM_ (putStrLn . formatItem) defeatedLoot
             
             lift pressEnterToContinue
         else if life player <= 0
             then do
-                liftIO $ putStrLn "You have been defeated..."
+                liftIO $ putStrLn "\nYou have been defeated..."
                 updatePlayerState player -- Update player's state to reflect death
                 lift pressEnterToContinue
         else do
@@ -86,7 +88,9 @@ processTurns ((name, _, Nothing) : rest) player enemies = do  -- Player's turn
     case parsedAction of
         Just Attack -> do
             updatedEnemies <- attackEnemy player enemies
-            processTurns rest player updatedEnemies
+            -- Filter out defeated enemies from the remaining combatants
+            let filteredRest = filter (\(_, _, maybeEnemy) -> maybeEnemy == Nothing || (maybeEnemy /= Nothing && enemyHealth (fromJust maybeEnemy) > 0)) rest
+            processTurns filteredRest player updatedEnemies
         Just OpenInv -> do
             updatedPlayer <- openInventory True
             turnEnded <- isTurnEnded
@@ -98,20 +102,21 @@ processTurns ((name, _, Nothing) : rest) player enemies = do  -- Player's turn
             liftIO $ putStrLn "Invalid action. Try again."
             processTurns ((name, agility (stats player), Nothing) : rest) player enemies
 processTurns ((name, _, Just enemy) : rest) player enemies = do  -- Enemy's turn
-    liftIO $ putStrLn $ "\n" ++ name ++ "'s turn (Enemy)"
-    updatedPlayer <- enemyTurn player enemy
-    updatePlayerState updatedPlayer
-    processTurns rest updatedPlayer enemies
+    -- Check if the enemy is still alive before proceeding
+    let maybeEnemy = find (\e -> enemyName e == enemyName enemy) enemies
+    case maybeEnemy of
+        Just aliveEnemy -> do
+            liftIO $ putStrLn $ "\n" ++ name ++ "'s turn (Enemy)"
+            updatedPlayer <- enemyTurn player aliveEnemy
+            updatePlayerState updatedPlayer
+            processTurns rest updatedPlayer enemies
+        Nothing -> do
+            -- Skip this enemy's turn since they're no longer alive
+            processTurns rest player enemies
 processTurns _ player enemies = do  -- Fallback case for unexpected inputs
     liftIO $ putStrLn "An error occurred in processing turns. Resuming combat loop."
     combatLoop player enemies
 
-
-
-
--- | Placeholder function to handle unimplemented features
-notImplemented :: String -> StateT GameState IO ()
-notImplemented message = liftIO $ putStrLn $ "Feature not implemented yet: " ++ message
 
 enemyTurn :: Player -> Enemy -> StateT GameState IO Player
 enemyTurn player enemy = do
@@ -130,12 +135,23 @@ attackEnemy player enemies = do
         [(i, "")] | i > 0 && i <= length enemies -> do
             let target = enemies !! (i - 1)
             let damage = max 1 (attack (stats player) - enemyDefense target)  -- Calculate damage
-            let updatedEnemies = map (\e -> if e == target then e { enemyHealth = max 0 (enemyHealth e - damage) } else e) enemies
-            liftIO $ putStrLn $ "You dealt " ++ show damage ++ " damage to " ++ enemyName target ++ "!"
-            return $ filter (\e -> enemyHealth e > 0) updatedEnemies  -- Remove dead enemies
+            let updatedTarget = target { enemyHealth = max 0 (enemyHealth target - damage) }
+            liftIO $ putStrLn $ "\nYou dealt " ++ show damage ++ " damage to " ++ enemyName target ++ "!"
+
+            -- Check if the enemy has been defeated
+            if enemyHealth updatedTarget <= 0
+                then liftIO $ putStrLn $ enemyName target ++ " defeated!"
+                else return ()
+
+            -- Update the enemies list with the modified target
+            let updatedEnemies = map (\e -> if e == target then updatedTarget else e) enemies
+
+            -- Return the enemies list, filtering out the defeated enemies
+            return $ filter (\e -> enemyHealth e > 0) updatedEnemies
         _ -> do
             liftIO $ putStrLn "Invalid choice. Try again."
             attackEnemy player enemies
+
 
 attemptFlee :: Player -> [Enemy] -> [(String, Int, Maybe Enemy)] -> StateT GameState IO ()
 attemptFlee player enemies remainingCombatants = do
@@ -155,35 +171,16 @@ attemptFlee player enemies remainingCombatants = do
             liftIO $ putStrLn "Flee attempt failed! The battle continues."
             processTurns remainingCombatants player enemies
 
-
--- | Print health bars for enemies and player
-printCombatHealthBars :: [Enemy] -> Player -> IO ()
-printCombatHealthBars enemies player = do
-    -- Print enemies section
-    displayHeader "ENEMIES"
-    mapM_ printEnemyHealth enemies
-
-    -- Print player section
-    displayHeader "PLAYER"
-    putStrLn $ generateHealthBar (life player) (vitality (stats player)) 20
-
--- | Print a single enemy's health with a newline after each
-printEnemyHealth :: Enemy -> IO ()
-printEnemyHealth enemy = do
-    putStrLn $ "- " ++ enemyName enemy
-    putStrLn $ generateHealthBar (enemyHealth enemy) (enemyMaxHealth enemy) 20
-    putStrLn ""  -- Add a blank line after each enemy
-
--- | Generate a single health bar
-generateHealthBar :: Int -> Int -> Int -> String
-generateHealthBar currentHealth maxHealth barLength =
-    let filledLength = (currentHealth * barLength) `div` maxHealth
-        emptyLength = barLength - filledLength
-    in replicate filledLength '█' ++ replicate emptyLength '░' ++ 
-       " (" ++ show currentHealth ++ "/" ++ show maxHealth ++ ")"
-
-
 -- | Collect loot from all defeated enemies
 collectLoot :: [Enemy] -> [Item]
 collectLoot enemies = concatMap loot enemies
 
+addItemToRoom :: [Item] -> Item -> [Item]
+addItemToRoom roomItems newItem =
+    let (matchingItems, otherItems) = partition (\i -> itemName i == itemName newItem) roomItems
+    in case matchingItems of
+        [existingItem] ->
+            let combinedItem = existingItem { quantity = quantity existingItem + quantity newItem }
+            in combinedItem : otherItems
+        [] -> newItem : otherItems
+        _ -> error "Unexpected multiple items with the same name in the room!"

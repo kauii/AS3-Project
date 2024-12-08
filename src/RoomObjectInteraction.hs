@@ -3,7 +3,7 @@ module RoomObjectInteraction (inspectObject, findObjectByName) where
 import Types
 import Control.Monad.State
 import Data.List (find)
-import Printer
+import Utils.Printer(printDescription)
 
 -- Function to inspect an object
 inspectObject :: RoomObject -> StateT GameState IO ()

@@ -1,4 +1,4 @@
-module FlagsUtils (checkFlag) where
+module Utils.FlagsUtils (checkFlag) where
 
 import qualified Data.Map as Map
 

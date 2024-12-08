@@ -4,12 +4,12 @@ import Types
 import Control.Monad
 import Inventory (openInventory)
 import Fight (enterCombat)
-import Utils
+import Utils.Utils
 import Control.Monad.State
-import Data.List (find, intercalate)
+import Data.List (find, partition)
 import Data.Char (toLower)
-import qualified Data.Map as Map
 import RoomObjectInteraction (findObjectByName, inspectObject)
+import Utils.Printer
 
 -- | Run the game loop using StateT to manage the game state
 runGameLoop :: GameState -> IO ()
@@ -18,22 +18,7 @@ runGameLoop = evalStateT gameLoop
 -- | The main game loop, running within StateT monad
 gameLoop :: StateT GameState IO ()
 gameLoop = do
-    gameState <- get
-    let player = playerState gameState
-    let currentRoom = getPlayerRoom player (world gameState)
-
-     -- Extract the item names from the room
-    let itemNames = map itemName (items currentRoom)
-    let itemLine = if null itemNames
-                   then "There are no items in the room."
-                   else "The following items are in the room: " ++ intercalate ", " itemNames
-
-    liftIO $ do
-        putStrLn $ "You are in: " ++ roomName currentRoom
-        putStrLn $ description currentRoom
-        putStrLn itemLine
-        putStrLn "Available actions: (Go, Take, OpenInv, Inspect, Attack, TalkTo, Quit)"
-
+    liftIO $ putStrLn "Available actions: (Go, Take, OpenInv, Inspect, Attack, TalkTo, Quit)"
     action <- liftIO getLine
     let parsedAction = parseAction action
 
@@ -57,7 +42,8 @@ handleAction action = case action of
     OpenInv -> do
         updatedPlayer <- openInventory False  -- Get the updated player state
         modify (\updatedState -> updatedState { playerState = updatedPlayer })  -- Update the game state
-    _             -> liftIO $ putStrLn "Goodbye!"
+    Quit             -> liftIO $ putStrLn "Goodbye!"
+    _ -> liftIO $ putStrLn "You can't do this here!"
 
 -- | Move the player in a given direction
 movePlayer :: Direction -> StateT GameState IO ()
@@ -78,17 +64,15 @@ movePlayer dir = do
                                 if any (\item -> itemName item == keyName) (inventory player)
                                 then do
                                     -- Unlock the door and remove the key
-                                    let newInventory = filter (\item -> itemName item /= keyName) (inventory player)
-                                    let updatedPlayer = player { inventory = newInventory }
                                     let updatedDoor = door { isLocked = False }
                                     let updatedDoors = map (\d -> if doorName d == doorName door then updatedDoor else d) (doors currentRoom)
                                     let updatedRoom = currentRoom { doors = updatedDoors }
                                     let updatedWorld = map (\room -> if roomName room == roomName currentRoom then updatedRoom else room) (world gameState)
-                                    put gameState { playerState = updatedPlayer, world = updatedWorld }
+                                    put gameState { world = updatedWorld }
                                     liftIO $ putStrLn $ "You unlocked the door with " ++ keyName ++ "."
                                     movePlayer dir -- Retry moving after unlocking
                                 else
-                                    liftIO $ putStrLn "This path is currently blocked."
+                                    liftIO $ putStrLn $ "This path is currently blocked. You need " ++ keyName ++ " to progress."
                             Nothing -> liftIO $ putStrLn "This path is currently blocked."
                         else do
                             let newRoom = findRoom exitRoomName (world gameState)
@@ -97,7 +81,16 @@ movePlayer dir = do
                             unless (null (enemies newRoom)) $ do
                                 liftIO $ putStrLn "You sense danger as you enter the room..."
                                 enterCombat  -- Call the combat system
-                Nothing -> liftIO $ putStrLn "You can't go that way!"
+                            printRoomDescription
+                Nothing -> do
+                    -- Move to the room if no door blocks the path
+                    let newRoom = findRoom exitRoomName (world gameState)
+                    put $ gameState { playerState = player { location = exitRoomName } }
+                    liftIO $ putStrLn $ "You move to " ++ exitRoomName
+                    unless (null (enemies newRoom)) $ do
+                        liftIO $ putStrLn "You sense danger as you enter the room..."
+                        enterCombat  -- Call the combat system
+                    printRoomDescription
         Nothing -> liftIO $ putStrLn "You can't go that way!"
 
 
@@ -112,7 +105,15 @@ takeItem itemNameInput = do
 
     case maybeItem of
         Just item -> do
-            let updatedInventory = item : inventory player
+             -- Check if the item already exists in the inventory
+            let (existingItems, otherItems) = partition (\i -> itemName i == itemName item) (inventory player)
+            let updatedInventory = case existingItems of
+                    [existingItem] -> 
+                        let combinedItem = existingItem { quantity = quantity existingItem + quantity item }
+                        in combinedItem : otherItems
+                    [] -> item : otherItems
+                    _ -> otherItems
+
             let updatedPlayer = player { inventory = updatedInventory }
             
             let updatedRoomItems = filter (\i -> itemName i /= itemName item) (items currentRoom)
@@ -135,9 +136,18 @@ talkTo npcNameInput = do
                     let player = playerState state
                     let maybeItem = find (\item -> itemName item == cItemName) (inventory player)
                     case maybeItem of
-                        Just _ -> do
-                            -- Remove item and execute interaction
-                            let updatedInventory = filter (\item -> itemName item /= cItemName) (inventory player)
+                        Just item -> do
+                            liftIO $ putStrLn $ "You give " ++ npcName npc ++ " " ++ itemName item
+                            -- Update inventory: decrement quantity or remove item
+                            let updatedInventory = 
+                                    if quantity item > 1
+                                    then map (\i -> if itemName i == cItemName 
+                                                    then i { quantity = quantity i - 1 }
+                                                    else i) 
+                                             (inventory player)
+                                    else filter (\i -> itemName i /= cItemName) (inventory player)
+
+                            -- Update the player state and execute interaction
                             put state { playerState = player { inventory = updatedInventory } }
                             onInteraction npc
                         Nothing -> liftIO $ putStrLn $ dialogUnavailable npc
@@ -146,11 +156,7 @@ talkTo npcNameInput = do
 
 -- Function to handle the "inspect" command
 inspect :: String -> StateT GameState IO ()
-inspect "room" = do
-    gameState <- get
-    let player = playerState gameState
-    let room = getPlayerRoom player (world gameState) -- Assuming a function or field to get current room
-    liftIO $ putStrLn $ description room -- Print room description
+inspect "room" = printRoomDescription -- Print room description
 inspect object = do
     gameState <- get
     let player = playerState gameState
@@ -159,10 +165,3 @@ inspect object = do
     case maybeObject of
         Nothing -> liftIO $ putStrLn "Object not found."
         Just obj -> inspectObject obj
-
-
--- Print a description if its flag condition is met
-printDescription :: Map.Map String Bool -> (String, String, Bool) -> IO ()
-printDescription flags (desc, flagKey, requiredState) =
-    when (checkFlag flagKey requiredState flags) $
-        putStrLn desc
