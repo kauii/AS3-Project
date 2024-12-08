@@ -10,6 +10,7 @@ import Data.List (find, intercalate)
 import Data.Char (toLower)
 import qualified Data.Map as Map
 import RoomObjectInteraction (findObjectByName, inspectObject)
+import Printer
 
 -- | Run the game loop using StateT to manage the game state
 runGameLoop :: GameState -> IO ()
@@ -18,22 +19,7 @@ runGameLoop = evalStateT gameLoop
 -- | The main game loop, running within StateT monad
 gameLoop :: StateT GameState IO ()
 gameLoop = do
-    gameState <- get
-    let player = playerState gameState
-    let currentRoom = getPlayerRoom player (world gameState)
-
-     -- Extract the item names from the room
-    let itemNames = map itemName (items currentRoom)
-    let itemLine = if null itemNames
-                   then "There are no items in the room."
-                   else "The following items are in the room: " ++ intercalate ", " itemNames
-
-    liftIO $ do
-        putStrLn $ "You are in: " ++ roomName currentRoom
-        putStrLn $ description currentRoom
-        putStrLn itemLine
-        putStrLn "Available actions: (Go, Take, OpenInv, Inspect, Attack, TalkTo, Quit)"
-
+    liftIO $ putStrLn "Available actions: (Go, Take, OpenInv, Inspect, Attack, TalkTo, Quit)"
     action <- liftIO getLine
     let parsedAction = parseAction action
 
@@ -97,6 +83,7 @@ movePlayer dir = do
                             unless (null (enemies newRoom)) $ do
                                 liftIO $ putStrLn "You sense danger as you enter the room..."
                                 enterCombat  -- Call the combat system
+                            printRoomDescription
                 Nothing -> liftIO $ putStrLn "You can't go that way!"
         Nothing -> liftIO $ putStrLn "You can't go that way!"
 
@@ -146,11 +133,7 @@ talkTo npcNameInput = do
 
 -- Function to handle the "inspect" command
 inspect :: String -> StateT GameState IO ()
-inspect "room" = do
-    gameState <- get
-    let player = playerState gameState
-    let room = getPlayerRoom player (world gameState) -- Assuming a function or field to get current room
-    liftIO $ putStrLn $ description room -- Print room description
+inspect "room" = printRoomDescription -- Print room description
 inspect object = do
     gameState <- get
     let player = playerState gameState
@@ -159,10 +142,3 @@ inspect object = do
     case maybeObject of
         Nothing -> liftIO $ putStrLn "Object not found."
         Just obj -> inspectObject obj
-
-
--- Print a description if its flag condition is met
-printDescription :: Map.Map String Bool -> (String, String, Bool) -> IO ()
-printDescription flags (desc, flagKey, requiredState) =
-    when (checkFlag flagKey requiredState flags) $
-        putStrLn desc

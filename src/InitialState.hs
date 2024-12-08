@@ -27,7 +27,7 @@ object1 = RoomObject {
 startingRoom :: Room
 startingRoom = Room {
     roomName = "Starting Room",
-    description = "A small, dimly lit room with stone walls.",
+    description = [("A small, dimly lit room with stone walls.", "default_true", True)],
     exits = [(North, "Hallway")],
     roomObjects = [],
     items = [healthPotion, rustyKey, goldCoin],
@@ -40,23 +40,25 @@ startingRoom = Room {
 hallway :: Room
 hallway = Room
     { roomName = "Hallway"
-    , description = "A long corridor with flickering torches on the walls. You can see another door to the east."
+    , description = [("A long corridor with flickering torches on the walls. You can see another door to the east.", "default_true", True)]
     , exits = [(South, "Starting Room"), (East, "Armory")]
     , roomObjects = []
     , items = [mysteriousPotion]
     , enemies = [goblin, ghoul]
     , doors = []
+    , npcs = []
     }
 
 armory :: Room
 armory = Room
     { roomName = "Armory"
-    , description = "An old armory filled with rusted weapons and armor. A treasure chest lies in the corner."
+    , description = [("An old armory filled with rusted weapons and armor. A treasure chest lies in the corner.", "default_true", True)]
     , exits = [(West, "Hallway")]
     , roomObjects = []
     , items = [sword]
     , enemies = []
     , doors = []
+    , npcs = []
     }
 
 -- Sample items
