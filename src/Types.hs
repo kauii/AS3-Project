@@ -20,7 +20,7 @@ import Control.Monad.State
 import qualified Data.Map as Map
 
 -- Directions for navigation
-data Direction = North | South | East | West deriving (Show, Eq)
+data Direction = North | South | East | West | Up | Down deriving (Show, Eq)
 
 -- Rooms, which can contain items, enemies, NPCs, and doors
 data Room = Room {

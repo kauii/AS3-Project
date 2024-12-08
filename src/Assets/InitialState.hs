@@ -12,7 +12,13 @@ initialState :: GameState
 initialState = GameState
     { playerState = initialPlayer
     , world = [startingRoom, hallway, armory]
-    , flags = Map.fromList [("statue_searched", False), ("compartment_opened", False), ("default_true", True)]
+    , flags = Map.fromList [
+        ("default_true", True),
+        ("chandelier_fixed", False),
+        ("chest_unlocked", False),
+        ("taken_dinner_key", False),
+        ("passage_detected", False)
+    ]
     }
 
 object1 :: RoomObject

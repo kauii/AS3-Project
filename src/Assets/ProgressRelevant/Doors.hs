@@ -2,6 +2,22 @@ module Assets.ProgressRelevant.Doors (module Assets.ProgressRelevant.Doors) wher
 
 import Types
 
+armoryDoor :: Door
+armoryDoor = Door {
+    doorName = "Rusted Iron Door",
+    leadsTo = "Armory",
+    isLocked = True,
+    keyRequired = Just "Rusted Key"
+}
+
+secretDoor :: Door
+secretDoor = Door {
+    doorName = "Secret Door",
+    leadsTo = "Secret Passage",
+    isLocked = True,
+    keyRequired = Just "Small Key"
+}
+
 -- Sample door
 woodenDoor :: Door
 woodenDoor = Door
@@ -10,3 +26,4 @@ woodenDoor = Door
     , isLocked = True
     , keyRequired = Just "Rusty Key"
     }
+

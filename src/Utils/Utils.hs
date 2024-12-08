@@ -30,6 +30,8 @@ parseDirection dir = case map toLower dir of  -- Normalize direction to lowercas
     "south" -> Just South
     "east"  -> Just East
     "west"  -> Just West
+    "up"    -> Just Up
+    "down"  -> Just Down
     _       -> Nothing
 
 
