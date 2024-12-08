@@ -4,6 +4,8 @@ import Types
 import Utils.Utils
 import Assets.ProgressRelevant.Items
 import Control.Monad.State
+import Utils.Printer
+import System.Console.ANSI
 
 sign :: RoomObject
 sign = RoomObject {
@@ -26,7 +28,7 @@ chandelier = RoomObject {
                     removeItemFromPlayer "Candle" 1
                     setGameFlag "chandelier_fixed" True
                     addItemToPlayer rustedKey
-                    liftIO $ putStrLn "You light the candle and put it in the empty candlestick. You hear a click and a Rusted Key drops to the floor. You pick it up."
+                    liftIO $ printColored Magenta "You light the candle and put it in the empty candlestick. You hear a click and a Rusted Key drops to the floor. You pick it up."
                 else do
                     gameState <- get
                     if checkFlag "chandelier_fixed" True (flags gameState)
@@ -90,7 +92,7 @@ portrait = RoomObject {
                 then do
                     setGameFlag "taken_dinner_key" True
                     addItemToPlayer smallKey
-                    liftIO $ putStrLn "A small key is hidden in a small crevice behind the portrait. You take it."
+                    liftIO $ printColored Magenta "A small key is hidden in a small crevice behind the portrait. You take it."
                 else do
                     liftIO $ putStrLn "There's nothing behind the portrait.")
     ]
@@ -109,7 +111,7 @@ cabinet = RoomObject {
                 then do
                     setGameFlag "cabinet_opened" True
                     addItemToPlayer silverKey
-                    liftIO $ putStrLn "You open the cabinet and find a silver key in it. You take it."
+                    liftIO $ printColored Magenta "You open the cabinet and find a silver key in it. You take it."
                 else do
                     liftIO $ putStrLn "The cabinet is already open.")
     ]
@@ -127,13 +129,12 @@ switches :: RoomObject
 switches = RoomObject
     { objectName = "Switches"
     , descriptions =
-        [ ("Three ancient switches are embedded in the wall. The symbols for Fire, Water, and Earth are carved above them. (To flip a lever, write 'flip element', to speak the passphrase, write 'speak passphrase')", "default_true", True)
+        [ ("Three ancient switches are embedded in the wall. The symbols for Fire, Water, and Earth are carved above them. (To flip a lever, write 'flip element')", "default_true", True)
         ]
     , roomObjectItems = []
     , roomActions =
         [ ("flip fire", \_ -> flipSwitch "Fire")
         , ("flip water", \_ -> flipSwitch "Water")
         , ("flip earth", \_ -> flipSwitch "Earth")
-        , ("speak passphrase", const speakPassphrase)
         ]
     }
