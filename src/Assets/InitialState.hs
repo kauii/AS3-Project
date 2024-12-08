@@ -13,7 +13,7 @@ import Assets.ProgressRelevant.Items
 initialState :: GameState
 initialState = GameState
     { playerState = initialPlayer
-    , world = [entranceHall, greatHall, library, diningRoom, armory, kitchen, secretPassage]
+    , world = [entranceHall, greatHall, library, diningRoom, armory, kitchen, secretPassage, crypt]
     , flags = Map.fromList [
         ("default_true", True),
         ("chandelier_fixed", False),
@@ -22,6 +22,7 @@ initialState = GameState
         ("cabinet_opened", False),
         ("passage_detected", False)
     ]
+    , stringFlags = Map.fromList [("switch_orders", [])]
     }
 
 object1 :: RoomObject

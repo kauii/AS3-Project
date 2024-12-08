@@ -149,7 +149,7 @@ crypt = Room
     , description = [ ("The air is damp and echoing, carrying the whispers of ancient secrets." 
     ++"\nThree ancient switches are set into the wall, their purpose shrouded in mystery.", "default_true", True)]
     , exits = [(South, "Secret Passage"), (Down, "Ancient Valley")]
-    , roomObjects = []
+    , roomObjects = [switches]
     , items = []
     , enemies = []
     , doors = [ancientSeal]

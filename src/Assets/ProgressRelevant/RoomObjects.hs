@@ -127,7 +127,7 @@ switches :: RoomObject
 switches = RoomObject
     { objectName = "Switches"
     , descriptions =
-        [ ("Three ancient switches are embedded in the wall. The symbols for Fire, Water, and Earth are carved above them.", "default_true", True)
+        [ ("Three ancient switches are embedded in the wall. The symbols for Fire, Water, and Earth are carved above them. (To flip a lever, write 'flip element', to speak the passphrase, write 'speak passphrase')", "default_true", True)
         ]
     , roomObjectItems = []
     , roomActions =
