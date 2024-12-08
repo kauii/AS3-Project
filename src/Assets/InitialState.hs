@@ -54,17 +54,9 @@ armory = Room
     , description = "An old armory filled with rusted weapons and armor. A treasure chest lies in the corner."
     , exits = [(West, "Hallway")]
     , roomObjects = []
-    , items = [sword]
+    , items = [woodenSword]
     , enemies = []
     , doors = []
-    }
-
--- Sample items
-healthPotion :: Item
-healthPotion = Item
-    { itemName = "Health Potion"
-    , itemDescription = "A small vial filled with a red liquid. Restores 20 health."
-    , effect = Just $ Effect { modifyStats = Nothing, heal = Just 20, unlockDoor = Nothing }
     }
 
 -- Sample items
@@ -79,44 +71,36 @@ mysteriousPotion = Item
             , agility = 0 }
             , heal = Nothing
             , unlockDoor = Nothing }
+    , itemType = Consumable
     }
 
-rustyKey :: Item
-rustyKey = Item
-    { itemName = "Rusty Key"
-    , itemDescription = "An old, rusty key. It might open a door."
-    , effect = Just $ Effect { modifyStats = Nothing, heal = Nothing, unlockDoor = Just "Wooden Door" }
-    }
-
-sword :: Item
-sword = Item
-    { itemName = "Sword"
-    , itemDescription = "A sharp blade, perfect for combat."
-    , effect = Nothing
-    }
 
 -- Sample enemy
 goblin :: Enemy
 goblin = Enemy
-    { enemyName = "Goblin"
+    { enemyId = Nothing
+    , enemyName = "Goblin"
     , enemyHealth = 30
     , enemyMaxHealth = 30
     , enemyAttack = 10
     , enemyDefense = 2
     , enemyAgility = 10
-    , loot = [goldCoin]
+    , loot = [woodenSword]
+    , enemyDifficulty = Easy
     }
 
 -- Sample enemy
 ghoul :: Enemy
 ghoul = Enemy
-    { enemyName = "Ghoul"
+    { enemyId = Nothing
+    , enemyName = "Ghoul"
     , enemyHealth = 25
     , enemyMaxHealth = 25
     , enemyAttack = 5
     , enemyDefense = 10
     , enemyAgility = 21
     , loot = [goldCoin]
+    , enemyDifficulty = Easy
     }
 
 goldCoin :: Item
@@ -124,6 +108,7 @@ goldCoin = Item
     { itemName = "Gold Coin"
     , itemDescription = "A shiny coin. Valuable for trade."
     , effect = Nothing
+    , itemType = KeyItem
     }
 
 -- Sample door
@@ -145,7 +130,12 @@ questGiver = NPC {
         liftIO $ putStrLn "Thank you for the Gold Coin! I grant you a Potion."
         state <- get
         let player = playerState state
-        let rewardItem = Item "Potion" "Restores health" Nothing
+        let rewardItem = Item {
+            itemName = "Potion",
+            itemDescription = "Restores health.",
+            effect = Just $ Effect { modifyStats = Nothing, heal = Just 20, unlockDoor = Nothing },
+            itemType = Consumable
+        }
         let updatedInventory = rewardItem : inventory player
         put state { playerState = player { inventory = updatedInventory } },
     dialogUnavailable = "I could really use a Gold Coin right now. Can you find one?"
@@ -169,6 +159,8 @@ initialPlayer = Player
     , life = 90
     , stats = PlayerStats { vitality = 100, attack = 20, defense = 5, agility = 20 }
     , quests = []
+    , weapon = Nothing
+    , armor = Nothing
     }
 
 -- Initial game state
@@ -177,4 +169,36 @@ initialState = GameState
     { playerState = initialPlayer
     , world = [startingRoom, hallway, armory]
     , flags = Map.fromList [("statue_searched", False), ("compartment_opened", False), ("is_true", True)]
+    }
+
+healthPotion :: Item
+healthPotion = Item
+    { itemName = "Health Potion"
+    , itemDescription = "A small vial filled with a red liquid. Restores 20 health."
+    , effect = Just $ Effect { modifyStats = Nothing, heal = Just 20, unlockDoor = Nothing }
+    , itemType = Consumable
+    }
+
+rustyKey :: Item
+rustyKey = Item
+    { itemName = "Rusty Key"
+    , itemDescription = "An old, rusty key. It might open a door."
+    , effect = Just $ Effect { modifyStats = Nothing, heal = Nothing, unlockDoor = Just "Wooden Door" }
+    , itemType = KeyItem
+    }
+
+woodenSword :: Item
+woodenSword = Item
+    { itemName = "Sword"
+    , itemDescription = "A sharp blade, perfect for combat."
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 10, defense = 0, agility = 0 }, heal = Nothing, unlockDoor = Nothing }
+    , itemType = Sword
+    }
+
+leatherArmor :: Item
+leatherArmor = Item
+    { itemName = "Leather Armor"
+    , itemDescription = "Provides basic protection."
+    , effect = Just $ Effect { modifyStats = Just PlayerStats { vitality = 0, attack = 0, defense = 5, agility = -1 }, heal = Nothing, unlockDoor = Nothing }
+    , itemType = Armor
     }

@@ -11,7 +11,9 @@ module Types (
     Enemy(..),
     Door(..),
     GameState(..),
-    Action(..)
+    Action(..),
+    ItemType(..),
+    Difficulty(..)
 ) where
 
 import Control.Monad.State
@@ -51,7 +53,8 @@ data NPC = NPC {
 data Item = Item {
     itemName :: String,            -- Name of the item
     itemDescription :: String,     -- Description of the item
-    effect :: Maybe Effect         -- Effect the item has when used (if any)
+    effect :: Maybe Effect,         -- Effect the item has when used (if any)
+    itemType :: ItemType
 } deriving (Show, Eq)
 
 -- Effects of items, which can modify player stats or state
@@ -75,7 +78,9 @@ data Player = Player {
     inventory :: [Item],           -- Items the player carries
     life :: Int,                   -- Player's current life
     stats :: PlayerStats,          -- The player's stats
-    quests :: [Quest]              -- List of quests the player is working on
+    quests :: [Quest],             -- List of quests the player is working on
+    weapon :: Maybe Item,
+    armor :: Maybe Item
 } deriving (Show)
 
 -- Quests for objectives
@@ -88,12 +93,14 @@ data Quest = Quest {
 
 -- Enemies in the game, which can be placed in rooms
 data Enemy = Enemy {
+    enemyId :: Maybe Int,
     enemyName :: String,           -- Name of the enemy
     enemyHealth :: Int,            -- Enemy's health
     enemyMaxHealth :: Int,
     enemyAttack :: Int,            -- Enemy's attack power
     enemyDefense :: Int,           -- Enemy's defense
     enemyAgility :: Int,           -- Enemy's agility for turn order
+    enemyDifficulty :: Difficulty,     -- Enemy's difficulty influences spawn area
     loot :: [Item]                 -- Items dropped upon defeat
 } deriving (Show, Eq)
 
@@ -122,6 +129,7 @@ data Action = Go Direction         -- Move in a specific direction
             | TalkTo String        -- Talk to an NPC by name
             | OpenDoor String      -- Open a door by name
             | UseItem String       -- Use an item by name
+            | Equip String
             | OpenInv              -- Opens the player's inventory
             | Quit                 -- Quit the game
             | Back                 -- Go Back
@@ -143,3 +151,9 @@ instance Show NPC where
         "  Dialog when item unavailable: " ++ dialogUnavailable npc
         -- You can't directly show `onInteraction` because it's a function
         ]
+
+data ItemType = Consumable | Sword | Armor | KeyItem
+    deriving (Show, Eq)
+
+data Difficulty = Easy | Normal | Hard
+    deriving (Show, Eq)

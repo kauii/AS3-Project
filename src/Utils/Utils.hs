@@ -1,4 +1,4 @@
-module Utils.Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded, printCombatHealthBars, generateHealthBar) where
+module Utils.Utils (module Utils.Utils) where
 
 import Types
     ( Action(..),
@@ -57,6 +57,7 @@ parseActionInventory input =
         ("drop" : itemWords) -> Just (Drop (unwords itemWords))
         ("inspect" : nameWords) -> Just (Inspect (unwords nameWords))
         ("use" : nameWords) -> Just (UseItem (unwords nameWords))
+        ("equip" : nameWords) -> Just (Equip (unwords nameWords))
         ["back"] -> Just Back
         _ -> Nothing
 
@@ -117,6 +118,10 @@ displayHeader caption = do
     putStrLn $ "╔" ++ border ++ "╗"
     putStrLn $ "║  " ++ caption ++ "  ║"
     putStrLn $ "╚" ++ border ++ "╝"
+
+displaySmallHeader :: String -> IO ()
+displaySmallHeader caption = do
+    putStrLn $ ">>> " ++ caption ++ " <<<"
 
 -- | Set the "turnEnded" flag
 setTurnEnded :: Bool -> StateT GameState IO ()
