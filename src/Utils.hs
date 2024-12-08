@@ -1,4 +1,4 @@
-module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded) where
+module Utils (parseAction, parseDirection, getPlayerRoom, findRoom, parseActionInventory, checkFlag, describeEffect, pressEnterToContinue, displayHeader, parseActionFight, setTurnEnded, isTurnEnded, printCombatHealthBars, generateHealthBar) where
 
 import Types
 import Data.Maybe (fromMaybe)
@@ -123,3 +123,28 @@ isTurnEnded = do
     state <- get
     return $ Map.findWithDefault False "turnEnded" (flags state)
 
+-- | Print health bars for enemies and player
+printCombatHealthBars :: [Enemy] -> Player -> IO ()
+printCombatHealthBars enemies player = do
+    -- Print enemies section
+    displayHeader "ENEMIES"
+    mapM_ printEnemyHealth enemies
+
+    -- Print player section
+    displayHeader "PLAYER"
+    putStrLn $ generateHealthBar (life player) (vitality (stats player)) 20
+
+-- | Print a single enemy's health with a newline after each
+printEnemyHealth :: Enemy -> IO ()
+printEnemyHealth enemy = do
+    putStrLn $ "- " ++ enemyName enemy
+    putStrLn $ generateHealthBar (enemyHealth enemy) (enemyMaxHealth enemy) 20
+    putStrLn ""  -- Add a blank line after each enemy
+
+-- | Generate a single health bar
+generateHealthBar :: Int -> Int -> Int -> String
+generateHealthBar currentHealth maxHealth barLength =
+    let filledLength = (currentHealth * barLength) `div` maxHealth
+        emptyLength = barLength - filledLength
+    in replicate filledLength '█' ++ replicate emptyLength '░' ++ 
+       " (" ++ show currentHealth ++ "/" ++ show maxHealth ++ ")"
