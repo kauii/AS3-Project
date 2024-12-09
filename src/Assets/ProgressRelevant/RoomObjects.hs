@@ -102,7 +102,7 @@ cabinet :: RoomObject
 cabinet = RoomObject {
     objectName = "Cabinet",
     descriptions = [("An old cabinet. It is locked", "cabinet_opened", False),
-                    ("An old cabinet. It's unlocked and empty.", "cabinet_opened", False)],
+                    ("An old cabinet. It's unlocked and empty.", "cabinet_opened", True)],
     roomObjectItems = [],
     roomActions = [
         ("open cabinet", \_ -> do

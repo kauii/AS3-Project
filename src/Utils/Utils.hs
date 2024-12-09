@@ -185,7 +185,9 @@ speakPassphrase = do
                         setSGR [SetColor Foreground Vivid Magenta]
                         putStrLn "You open the cabinet and find a silver key in it. You take it."
                         setSGR [Reset]
-                else liftIO $ putStrLn "The passphrase echoes into silence. Nothing happens."
+                else do 
+                    liftIO $ putStrLn "The passphrase echoes into silence. Nothing happens."
+                    resetSwitchOrder
         else do 
             liftIO $ do
                 setSGR [SetColor Foreground Vivid Yellow] 

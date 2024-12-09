@@ -24,7 +24,7 @@ randomizeRoom room = do
                 else return (items room)
 
     -- Randomize enemies with a 40% chance
-    addEnemies <- randomChance 40
+    addEnemies <- randomChance 60
     newEnemies <- if addEnemies
                   then randomizeEnemies (enemies room) (difficulty room)
                   else return (enemies room)
